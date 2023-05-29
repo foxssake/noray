@@ -12,7 +12,7 @@ const env = process.env
 export class NorayConfig {
   socket = {
     host: env.NORAY_SOCKET_HOST ?? '::1',
-    port: integer(env.NORAY_SOCKET_PORT) ?? 8808
+    port: integer(env.NORAY_SOCKET_PORT) ?? 8890
   }
 
   udpRelay = {
