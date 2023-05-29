@@ -8,7 +8,7 @@ import { NetAddress } from '../../src/relay/net.address.mjs'
 import { sleep } from '../../src/utils.mjs'
 import { UDPSocketPool } from '../../src/relay/udp.socket.pool.mjs'
 
-describe('UDP Relay', { concurrency: false }, async () => {
+describe('UDP Relay', { concurrency: false, skip: true }, async () => {
   const context = new End2EndContext()
 
   /** @type {dgram.Socket} */

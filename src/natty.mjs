@@ -1,9 +1,5 @@
-/* eslint-disable */
-import * as nlon from '@elementbound/nlon'
-/* eslint-enable */
 import * as net from 'node:net'
 import { EventEmitter } from 'node:events'
-import { wrapSocketServer } from '@elementbound/nlon-socket'
 import logger from './logger.mjs'
 import { config } from './config.mjs'
 
@@ -20,9 +16,6 @@ const hooks = []
 export class Natty extends EventEmitter {
   /** @type {net.Server} */
   #socket
-
-  /** @type {nlon.Server} */
-  #nlons
 
   #log = logger
 
@@ -41,13 +34,7 @@ export class Natty extends EventEmitter {
 
     const socket = net.createServer()
 
-    /** @type {nlon.Server} */
-    const nlons = wrapSocketServer(socket, {
-      logger: this.#log.child({ name: 'nlons' })
-    })
-
     this.#socket = socket
-    this.#nlons = nlons
 
     // Import modules for hooks
     for (const m of modules) {
@@ -76,9 +63,5 @@ export class Natty extends EventEmitter {
     this.emit('close')
 
     this.#socket.close()
-  }
-
-  get nlons () {
-    return this.#nlons
   }
 }

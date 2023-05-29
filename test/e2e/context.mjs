@@ -1,6 +1,4 @@
-import { createSocketPeer } from '@elementbound/nlon-socket'
 import logger from '../../src/logger.mjs'
-import { config } from '../../src/config.mjs'
 import { Natty } from '../../src/natty.mjs'
 import { promiseEvent } from '../../src/utils.mjs'
 
