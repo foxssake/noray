@@ -13,15 +13,15 @@ const defaultModules = [
 
 const hooks = []
 
-export class Noray extends EventEmitter {
+export class Natty extends EventEmitter {
   /** @type {net.Server} */
   #socket
 
   #log = logger
 
   /**
-  * Register a Noray configuration hook.
-  * @param {function(Noray)} h Hook
+  * Register a Natty configuration hook.
+  * @param {function(Natty)} h Hook
   */
   static hook (h) {
     hooks.push(h)
@@ -30,7 +30,7 @@ export class Noray extends EventEmitter {
   async start (modules) {
     modules ??= defaultModules
 
-    this.#log.info('Starting Noray')
+    this.#log.info('Starting Natty')
 
     const socket = net.createServer()
 
