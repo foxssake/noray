@@ -2,16 +2,16 @@
   "name": "@foxssake/noray",
   "version": "0.13.2",
   "description": "Online multiplayer orchestrator and potential game platform",
-  "main": "src/natty.mjs",
+  "main": "src/noray.mjs",
   "bin": {
-    "natty": "bin/natty.mjs"
+    "noray": "bin/noray.mjs"
   },
   "scripts": {
     "lint": "eslint --ext .mjs src",
     "doc": "jsdoc -c .jsdoc.js src",
     "test": "node --test test/spec/ | utap",
     "test:e2e": "node --test test/e2e/ | node scripts/taplog.mjs utap \"pino-pretty -c\"",
-    "start": "node bin/natty.mjs | pino-pretty"
+    "start": "node bin/noray.mjs | pino-pretty"
   },
   "keywords": [],
   "author": "Tamas Galffy",

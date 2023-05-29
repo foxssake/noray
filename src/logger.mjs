@@ -13,7 +13,7 @@ export function getLogLevel () {
 }
 
 const logger = pino({
-  name: 'natty',
+  name: 'noray',
   level: getLogLevel()
 })
 

@@ -23,7 +23,7 @@ const log = logger.child({ name: 'UDPRelayHandler' })
 *
 * Example: Port 1 is allocated for Host, port 2 is allocated for Client. When
 * we get a packet targeting port 1 from Client, we use port 2 to relay the data
-* to Host. This way, Client will always appear as Natty:2 to the Host.
+* to Host. This way, Client will always appear as Noray:2 to the Host.
 */
 export class UDPRelayHandler extends EventEmitter {
   /** @type {UDPSocketPool} */

@@ -1,4 +1,4 @@
-import { Natty } from '../src/natty.mjs'
+import { Noray } from '../src/noray.mjs'
 
-const natty = new Natty()
-natty.start()
+const noray = new Noray()
+noray.start()

@@ -1,12 +1,12 @@
 # noray
 
-A fork of [Natty](https://github.com/foxssake/natty) for open-source purposes.
+A fork of [Noray](https://github.com/foxssake/noray) for open-source purposes.
 
 ## Motivation
 
-While Natty is open-source, its scope becomes quite large from v1 onwards -
+While Noray is open-source, its scope becomes quite large from v1 onwards -
 managing users, supporting multiple different games, different orchestration
-strategies, multiple sessions per user, lobbies, etc. This can make Natty an
+strategies, multiple sessions per user, lobbies, etc. This can make Noray an
 unwieldy solution for situations where you just want to get something running
 online, or if you don't plan on running a whole platform for some individual
 multiplayer games.
@@ -15,7 +15,7 @@ This is the niche noray intends to fill - a very simple server that manages
 connectivity between players. Anything more than that is the responsibility of
 the game or some other backend service unrelated to noray.
 
-Thankfully, at the point of writing, Natty implements most of the features
+Thankfully, at the point of writing, Noray implements most of the features
 needed for noray, so it can start its life as a stripped-down fork.
 
 ## Scope
