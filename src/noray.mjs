@@ -4,24 +4,20 @@ import logger from './logger.mjs'
 import { config } from './config.mjs'
 
 const defaultModules = [
-  'sessions/sessions.mjs',
-  'games/games.mjs',
-  'lobbies/lobbies.mjs',
-  'connection/connections.mjs',
   'relay/relay.mjs'
 ]
 
 const hooks = []
 
-export class Natty extends EventEmitter {
+export class Noray extends EventEmitter {
   /** @type {net.Server} */
   #socket
 
   #log = logger
 
   /**
-  * Register a Natty configuration hook.
-  * @param {function(Natty)} h Hook
+  * Register a Noray configuration hook.
+  * @param {function(Noray)} h Hook
   */
   static hook (h) {
     hooks.push(h)
@@ -30,7 +26,7 @@ export class Natty extends EventEmitter {
   async start (modules) {
     modules ??= defaultModules
 
-    this.#log.info('Starting Natty')
+    this.#log.info('Starting Noray')
 
     const socket = net.createServer()
 
