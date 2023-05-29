@@ -28,9 +28,6 @@
     "utap": "^0.2.0"
   },
   "dependencies": {
-    "@elementbound/nlon": "^1.2.1",
-    "@elementbound/nlon-socket": "^1.2.1",
-    "ajv": "^8.12.0",
     "dotenv": "^16.0.3",
     "nanoid": "^4.0.1",
     "pino": "^8.11.0"
