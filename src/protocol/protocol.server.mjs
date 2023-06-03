@@ -2,6 +2,20 @@ import * as net from 'node:net'
 import * as readline from 'node:readline'
 import * as events from 'node:events'
 
+/**
+* Protocol implementation.
+*
+* The "protocol" itself is as follows:
+*
+* ```
+* <command> <data>\n
+* <command>\n
+* ```
+*
+* If the incoming data fits either of the above formats, an event with the
+* command's name is emitted. The data can be an arbitrary string. The same
+* applies to the command, with the exception that it can't contain spaces.
+*/
 export class ProtocolServer extends events.EventEmitter {
   #readers = new Map()
 
