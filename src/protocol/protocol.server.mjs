@@ -32,11 +32,11 @@ export class ProtocolServer extends events.EventEmitter {
   * @param {string} line
   */
   #handleLine(socket, line) {
-    const len = line.length
     const idx = line.indexOf(' ')
 
-    const command = line.slice(0, (len + idx) % len)
-    const data = line.slice((len + idx) % len + 1)
+    const [command, data] = idx >= 0
+      ? [line.slice(0, idx), line.slice(idx + 1)]
+      : [line, '']
 
     this.emit(command, data, socket)
   }
