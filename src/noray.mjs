@@ -2,9 +2,11 @@ import * as net from 'node:net'
 import { EventEmitter } from 'node:events'
 import logger from './logger.mjs'
 import { config } from './config.mjs'
+import { ProtocolServer } from './protocol/protocol.server.mjs'
 
 const defaultModules = [
-  'relay/relay.mjs'
+  'relay/relay.mjs',
+  'echo/echo.mjs'
 ]
 
 const hooks = []
@@ -12,6 +14,9 @@ const hooks = []
 export class Noray extends EventEmitter {
   /** @type {net.Server} */
   #socket
+
+  /** @type {ProtocolServer} */
+  #protocolServer
 
   #log = logger
 
@@ -31,6 +36,7 @@ export class Noray extends EventEmitter {
     const socket = net.createServer()
 
     this.#socket = socket
+    this.#protocolServer = new ProtocolServer()
 
     // Import modules for hooks
     for (const m of modules) {
@@ -49,6 +55,11 @@ export class Noray extends EventEmitter {
         config.socket.host, config.socket.port
       )
 
+      socket.on('connection', conn => {
+        this.#protocolServer.attach(conn)
+        conn.on('close', () => this.#protocolServer.detach(conn))
+      })
+
       this.emit('listening', config.socket.port, config.socket.host)
     })
   }
@@ -57,7 +68,10 @@ export class Noray extends EventEmitter {
     this.#log.info('Shutting down')
 
     this.emit('close')
-
     this.#socket.close()
+  }
+
+  get protocolServer () {
+    return this.#protocolServer
   }
 }
