@@ -1,4 +1,4 @@
-import { Noray } from "../noray.mjs";
+import { Noray } from '../noray.mjs'
 import logger from '../logger.mjs'
 
 const log = logger.child({ name: 'Echo' })

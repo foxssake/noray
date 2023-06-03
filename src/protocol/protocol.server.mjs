@@ -1,4 +1,6 @@
+/* eslint-disable */
 import * as net from 'node:net'
+/* eslint-enable */
 import * as readline from 'node:readline'
 import * as events from 'node:events'
 
@@ -45,7 +47,7 @@ export class ProtocolServer extends events.EventEmitter {
   * @param {net.Socket} socket
   * @param {string} line
   */
-  #handleLine(socket, line) {
+  #handleLine (socket, line) {
     const idx = line.indexOf(' ')
 
     const [command, data] = idx >= 0
