@@ -9,7 +9,7 @@ import { formatByteSize, formatDuration } from '../utils.mjs'
 export const udpRelayHandler = new UDPRelayHandler()
 constrainRelayTableSize(udpRelayHandler, config.udpRelay.maxSlots)
 
-const log = logger.child({ name: 'Relays' })
+const log = logger.child({ name: 'mod:relay' })
 
 Noray.hook(noray => {
   log.info(

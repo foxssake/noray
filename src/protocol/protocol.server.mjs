@@ -3,6 +3,7 @@ import * as net from 'node:net'
 /* eslint-enable */
 import * as readline from 'node:readline'
 import * as events from 'node:events'
+import assert from 'node:assert'
 
 /**
 * Protocol implementation.
@@ -41,6 +42,33 @@ export class ProtocolServer extends events.EventEmitter {
   detach (socket) {
     this.#readers.get(socket)?.close()
     this.#readers.delete(socket)
+  }
+
+  /**
+  * Configure server using callback.
+  * @param {function(ProtocolServer)} cb Callback
+  * @returns {ProtocolServer} Server
+  */
+  configure (cb) {
+    cb(this)
+    return this
+  }
+
+  /**
+  * Send a command through socket.
+  * @param {net.Socket} socket Socket
+  * @param {string} command Command
+  * @param {string} [data] Data
+  */
+  send (socket, command, data) {
+    assert(!command.includes(' '), 'Command can\'t contain spaces!')
+    assert(!command.includes('\n'), 'Command can\'t contain newlines!')
+    assert(!data || !data.includes('\n'), 'Data can\'t contain newlines!')
+
+    socket.write(data
+      ? `${command} ${data}\n`
+      : `${command}\n`
+    )
   }
 
   /**

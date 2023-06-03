@@ -1,7 +1,7 @@
 import { Noray } from '../noray.mjs'
 import logger from '../logger.mjs'
 
-const log = logger.child({ name: 'Echo' })
+const log = logger.child({ name: 'mod:echo' })
 
 Noray.hook(noray => {
   log.info('Adding echo command')
