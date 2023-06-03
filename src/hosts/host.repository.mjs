@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { HostEntity } from './host.entity.mjs'
 /* eslint-enable */
-import { Repository, fieldIdMapper } from "../repository.mjs";
+import { Repository, fieldIdMapper } from '../repository.mjs'
 
 /**
 * Repository for tracking hosts.
@@ -15,5 +15,3 @@ export class HostRepository extends Repository {
     })
   }
 }
-
-export const hostRepository = new HostRepository()

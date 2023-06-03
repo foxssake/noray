@@ -1,5 +1,7 @@
-import { nanoid } from 'nanoid'
+/* eslint-disable */
 import * as net from 'node:net'
+/* eslint-enable */
+import { nanoid } from 'nanoid'
 
 /**
 * Host entity.

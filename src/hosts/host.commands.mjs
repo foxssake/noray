@@ -1,8 +1,8 @@
 /* eslint-disable */
 import * as net from 'node:net'
+import { HostRepository } from './host.repository.mjs'
 /* eslint-enable */
-import { HostRepository } from "./host.repository.mjs";
-import { HostEntity } from './host.entity.mjs';
+import { HostEntity } from './host.entity.mjs'
 import logger from '../logger.mjs'
 
 /**

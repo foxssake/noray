@@ -50,7 +50,7 @@ export class ProtocolServer extends events.EventEmitter {
   * @returns {ProtocolServer} Server
   */
   configure (cb) {
-    cb(this)
+    cb.apply(this)
     return this
   }
 
