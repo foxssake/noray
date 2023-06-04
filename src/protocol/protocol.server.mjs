@@ -46,11 +46,11 @@ export class ProtocolServer extends events.EventEmitter {
 
   /**
   * Configure server using callback.
-  * @param {function(ProtocolServer)} cb Callback
+  * @param {function(ProtocolServer)} configurer Callback
   * @returns {ProtocolServer} Server
   */
-  configure (cb) {
-    cb.apply(this)
+  configure (configurer) {
+    configurer(this)
     return this
   }
 
