@@ -21,6 +21,9 @@ Noray.hook(noray => {
     config.udpRelay.cleanupInterval * 1000
   )
 
+  log.info('Listening on port %d for UDP remote registrars', config.udpRelay.registrarPort)
+  udpRemoteRegistrar.listen(config.udpRelay.registrarPort, config.socket.host)
+
   log.info(
     'Limiting relay bandwidth to %s/s and global bandwidth to %s/s',
     formatByteSize(config.udpRelay.maxIndividualTraffic),

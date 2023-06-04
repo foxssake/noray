@@ -19,6 +19,7 @@ export class NorayConfig {
     maxSlots: number(env.NORAY_UDP_RELAY_MAX_SLOTS) ?? 16384,
     timeout: duration(env.NORAY_UDP_RELAY_TIMEOUT ?? '30s'),
     cleanupInterval: duration(env.NORAY_UDP_RELAY_CLEANUP_INTERVAL ?? '30s'),
+    registrarPort: number(env.NORAY_UDP_REGISTRAR_PORT) ?? 8809,
 
     maxIndividualTraffic: byteSize(env.NORAY_UDP_RELAY_MAX_INDIVIDUAL_TRAFFIC ?? '128kb'),
     maxGlobalTraffic: byteSize(env.NORAY_UDP_RELAY_MAX_GLOBAL_TRAFFIC ?? '1gb'),

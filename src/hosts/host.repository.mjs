@@ -14,4 +14,13 @@ export class HostRepository extends Repository {
       idMapper: fieldIdMapper('oid')
     })
   }
+
+  /**
+  * Find host by private id.
+  * @param {string} pid Private id
+  * @returns {HostEntity|undefined} Host
+  */
+  findByPid (pid) {
+    return [...this.list()].find(host => host.pid === pid)
+  }
 }
