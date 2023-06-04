@@ -4,6 +4,9 @@ import * as net from 'node:net'
 import * as readline from 'node:readline'
 import * as events from 'node:events'
 import assert from 'node:assert'
+import logger from '../logger.mjs'
+
+const log = logger.child({ name: 'ProtocolServer' })
 
 /**
 * Protocol implementation.
@@ -58,12 +61,13 @@ export class ProtocolServer extends events.EventEmitter {
   * Send a command through socket.
   * @param {net.Socket} socket Socket
   * @param {string} command Command
-  * @param {string} [data] Data
+  * @param {any} [data] Data
   */
   send (socket, command, data) {
+    data = data.toString()
     assert(!command.includes(' '), 'Command can\'t contain spaces!')
     assert(!command.includes('\n'), 'Command can\'t contain newlines!')
-    assert(!data || !data.includes('\n'), 'Data can\'t contain newlines!')
+    assert(!data || !data?.includes('\n'), 'Data can\'t contain newlines!')
 
     socket.write(data
       ? `${command} ${data}\n`
@@ -82,6 +86,13 @@ export class ProtocolServer extends events.EventEmitter {
       ? [line.slice(0, idx), line.slice(idx + 1)]
       : [line, '']
 
-    this.emit(command, data, socket)
+    try {
+      this.emit(command, data, socket)
+    } catch (err) {
+      log.warn(
+        { line, err },
+        'Error handling line'
+      )
+    }
   }
 }

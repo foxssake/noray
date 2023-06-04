@@ -29,7 +29,7 @@ Noray.hook(noray => {
   )
 
   log.info('Listening on port %d for UDP remote registrars', config.udpRelay.registrarPort)
-  udpRemoteRegistrar.listen(config.udpRelay.registrarPort, config.socket.host)
+  udpRemoteRegistrar.listen(config.udpRelay.registrarPort)
 
   log.info(
     'Limiting relay bandwidth to %s/s and global bandwidth to %s/s',
@@ -60,5 +60,8 @@ Noray.hook(noray => {
   noray.on('close', () => {
     log.info('Noray shutting down, cancelling UDP relay cleanup job')
     clearInterval(cleanupJob)
+
+    log.info('Closing UDP remote registrar socket')
+    udpRemoteRegistrar.socket.close()
   })
 })

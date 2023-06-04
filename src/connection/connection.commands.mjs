@@ -53,8 +53,10 @@ export function handleConnectRelay (hostRepository) {
         'Client attempting to connect to host'
       )
       assert(host, 'Unknown host oid: ' + oid)
+      log.debug({ relay: host.relay }, 'Asserting relay')
       assert(host.relay, 'Host has no relay!')
 
+      log.debug({ relay: host.relay }, 'Replying with relay')
       server.send(socket, 'connect-relay', host.relay)
       log.debug(
         { client: stringifyAddress(socket.address()), relay: host.relay, oid },
