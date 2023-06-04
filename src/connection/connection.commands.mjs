@@ -14,7 +14,7 @@ export function handleConnect (hostRepository) {
   return function (server) {
     server.on('connect', (data, socket) => {
       const log = logger.child({ name: 'cmd:connect' })
-      
+
       const oid = data
       const host = hostRepository.find(oid)
       log.debug(

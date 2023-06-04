@@ -9,4 +9,3 @@ Noray.hook(noray => {
   log.info('Registering host commands')
   noray.protocolServer.configure(handleConnect(hostRepository))
 })
-
