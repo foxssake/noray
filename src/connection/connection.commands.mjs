@@ -1,4 +1,5 @@
-/* eslint-disable */
+/* eslint-disble */
+import { ProtocolServer } from '../protocol/protocol.server.mjs'
 import { HostRepository } from '../hosts/host.repository.mjs'
 /* eslint-enable */
 import assert from 'node:assert'
