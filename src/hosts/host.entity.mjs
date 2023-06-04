@@ -28,6 +28,12 @@ export class HostEntity {
   socket
 
   /**
+  * Relay port.
+  * @type {number}
+  */
+  relay
+
+  /**
   * Construct entity.
   * @param {HostEntity} options Options
   */

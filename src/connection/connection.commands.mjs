@@ -35,6 +35,35 @@ export function handleConnect (hostRepository) {
   }
 }
 
+/**
+* @param {HostRepository} hostRepository
+*/
+export function handleConnectRelay (hostRepository) {
+  /**
+  * @param {ProtocolServer} server
+  */
+  return function (server) {
+    server.on('connect-relay', (data, socket) => {
+      const log = logger.child({ name: 'cmd:connect-relay' })
+
+      const oid = data
+      const host = hostRepository.find(oid)
+      log.debug(
+        { oid, client: socket.address() },
+        'Client attempting to connect to host'
+      )
+      assert(host, 'Unknown host oid: ' + oid)
+      assert(host.relay, 'Host has no relay!')
+
+      server.send(socket, 'connect-relay', host.relay)
+      log.debug(
+        { client: stringifyAddress(socket.address()), relay: host.relay, oid },
+        'Connected client to host'
+      )
+    })
+  }
+}
+
 function stringifyAddress (address) {
   return `${address.address}:${address.port}`
 }
