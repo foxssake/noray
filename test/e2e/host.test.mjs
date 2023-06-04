@@ -1,8 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
-import * as net from 'node:net'
 import { End2EndContext } from './context.mjs'
-import { sleep } from '../../src/utils.mjs'
 
 describe('Hosts', () => {
   const context = new End2EndContext()
@@ -17,19 +15,12 @@ describe('Hosts', () => {
       
       client.write('register-host\n')
 
-      // Wait a bit for response
-      await sleep(0.25)
-
       // Read response
-      const lines = []
-      for (let line = ''; line != null; line = client.read()) {
-        lines.push(line)
-      }
-      const response = lines.join('\n')
+      const response = await context.read(client)
 
       // Check if we got both id's
-      assert(response.includes('set-oid '), 'Missing open id!')
-      assert(response.includes('set-pid '), 'Missing private id!')
+      assert(response.find(cmd => cmd.startsWith('set-oid')), 'Missing open id!')
+      assert(response.find(cmd => cmd.startsWith('set-pid')), 'Missing private id!')
     })
   })
 

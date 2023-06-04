@@ -1,8 +1,10 @@
 import * as net from 'node:net'
 import logger from '../../src/logger.mjs'
 import { Noray } from '../../src/noray.mjs'
-import { promiseEvent } from '../../src/utils.mjs'
+import { promiseEvent, sleep } from '../../src/utils.mjs'
 import { config } from '../../src/config.mjs'
+
+const READ_WAIT = 0.05
 
 export class End2EndContext {
   #clients = []
@@ -34,6 +36,18 @@ export class End2EndContext {
     await promiseEvent(socket, 'connect')
     this.#clients.push(socket)
     return socket
+  }
+
+  async read (socket) {
+    await sleep(READ_WAIT)
+
+    const lines = []
+    for (let line = ''; line != null; line = socket.read()) {
+      lines.push(line)
+    }
+
+    console.log('Got response', lines.join(''))
+    return lines.join('').split('\n')
   }
 
   shutdown () {
