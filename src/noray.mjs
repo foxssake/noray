@@ -7,7 +7,8 @@ import { ProtocolServer } from './protocol/protocol.server.mjs'
 const defaultModules = [
   'relay/relay.mjs',
   'echo/echo.mjs',
-  'hosts/host.mjs'
+  'hosts/host.mjs',
+  'connection/connection.mjs'
 ]
 
 const hooks = []
