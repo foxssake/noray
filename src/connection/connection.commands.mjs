@@ -1,4 +1,4 @@
-/* eslint-disble */
+/* eslint-disable */
 import { ProtocolServer } from '../protocol/protocol.server.mjs'
 import { HostRepository } from '../hosts/host.repository.mjs'
 /* eslint-enable */
