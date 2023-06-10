@@ -53,16 +53,19 @@ export function handleConnectRelay (hostRepository) {
 
       const oid = data
       const host = hostRepository.find(oid)
+      const client = hostRepository.findBySocket(socket)
       log.debug(
         { oid, client: socket.address() },
         'Client attempting to connect to host'
       )
       assert(host, 'Unknown host oid: ' + oid)
-      log.debug({ relay: host.relay }, 'Asserting relay')
       assert(host.relay, 'Host has no relay!')
+      assert(client, 'Unknown client from address')
+      assert(client.relay, 'Client has no relay!')
 
       log.debug({ relay: host.relay }, 'Replying with relay')
       server.send(socket, 'connect-relay', host.relay)
+      server.send(host.socket, 'connect-relay', client.relay)
       log.debug(
         { client: stringifyAddress(socket.address()), relay: host.relay, oid },
         'Connected client to host'
