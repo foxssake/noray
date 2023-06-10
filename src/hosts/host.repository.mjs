@@ -1,4 +1,5 @@
 /* eslint-disable */
+import * as net from 'node:net'
 import { HostEntity } from './host.entity.mjs'
 /* eslint-enable */
 import { Repository, fieldIdMapper } from '../repository.mjs'
@@ -22,5 +23,14 @@ export class HostRepository extends Repository {
   */
   findByPid (pid) {
     return [...this.list()].find(host => host.pid === pid)
+  }
+
+  /**
+  * Find host by socket.
+  * @param {net.Socket} socket Socket
+  * @returns {HostEntity|undefined} Host
+  */
+  findBySocket (socket) {
+    return [...this.list()].find(host => host.socket === socket)
   }
 }
