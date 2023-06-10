@@ -1,5 +1,6 @@
 /* eslint-disable */
 import * as net from 'node:net'
+import * as dgram from 'node:dgram'
 /* eslint-enable */
 import { nanoid } from 'nanoid'
 
@@ -32,6 +33,12 @@ export class HostEntity {
   * @type {number}
   */
   relay
+
+  /**
+  * Host remote info.
+  * @type {dgram.RemoteInfo}
+  */
+  rinfo
 
   /**
   * Construct entity.

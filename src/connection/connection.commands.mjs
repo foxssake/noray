@@ -23,8 +23,9 @@ export function handleConnect (hostRepository) {
         'Client attempting to connect to host'
       )
       assert(host, 'Unknown host oid: ' + oid)
+      assert(host.rinfo, 'Host has no remote info registered!')
 
-      const hostAddress = stringifyAddress(host.socket.address())
+      const hostAddress = stringifyAddress(host.rinfo)
       const clientAddress = stringifyAddress(socket.address())
       server.send(socket, 'connect', hostAddress)
       server.send(host.socket, 'connect', clientAddress)
