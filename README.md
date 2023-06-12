@@ -25,20 +25,24 @@ To ensure connection, noray will support *NAT punchthrough orchestration* and
 
 A game would happen through the following flow:
 
-- The host connects to noray and sends a host request with its id
-  - This id can be whatever, as long as its unique
-  - It can be some random-generated string, a player name, a lobby name, etc.
-  - It is left to the game itself
+- The host connects to noray and sends a host request
+  - noray replies with the host's OpenID and PrivateID
+- The host sends its PID to noray's UDP remote registrar port
+  - noray saves the host's external address for UDP comms
   - noray allocates a relay for the host
-- Successive clients send a connect request to noray
-  - The request contains the host id
+- Clients connect to noray and send a register host request<sup>1</sup>
+  - noray replies with the client's OpenID and PrivateID
+- Clients send their PIDs to noray's UDP remote registrar port
+  - noray saves the external addresses and allocates relays<sup>2</sup>
+- Clients send a connect request to noray with the host's OID
 - noray sends a handshake message to both parties
   - The host receives the client's external address
   - The client receives the host's external address
 - If the handshake succeeds, the client connects to the host
 - If the handshake fails, the client sends a relay connect request to noray
   - The client receives the host's relay address to connect to
-  - When the client sends data to the host, the client gets its own relay allocated
+  - The host receives the client's relay address to connect to
+  - noray will relay the traffic
 
 ## Protocol
 
