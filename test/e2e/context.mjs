@@ -1,4 +1,5 @@
 import * as net from 'node:net'
+import * as dgram from 'node:dgram'
 import logger from '../../src/logger.mjs'
 import { Noray } from '../../src/noray.mjs'
 import { promiseEvent, sleep } from '../../src/utils.mjs'
@@ -48,6 +49,36 @@ export class End2EndContext {
 
     console.log('Got response', lines.join(''))
     return lines.join('').split('\n')
+  }
+
+  /**
+  * @param {string} pid
+  */
+  async registerExternal (pid) {
+    const udp = dgram.createSocket('udp4')
+    udp.bind()
+    await promiseEvent(udp, 'listening')
+
+    let done = false
+    let error
+    udp.on('message', (buf, _rinfo) => {
+      const msg = buf.toString('utf8')
+      done = true
+      error = msg !== 'OK' && msg
+    })
+
+    while (!done) {
+      udp.send(pid, config.udpRelay.registrarPort)
+      await sleep(0.1)
+    }
+
+    if (error) {
+      throw new Error(error)
+    }
+
+    const result = udp.address().port
+    udp.close()
+    return result
   }
 
   shutdown () {
