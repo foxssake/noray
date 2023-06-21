@@ -6,6 +6,7 @@ import { sleep } from '../../../src/utils.mjs'
 import { useDynamicRelay } from '../../../src/relay/dynamic.relaying.mjs'
 import { RelayEntry } from '../../../src/relay/relay.entry.mjs'
 import { NetAddress } from '../../../src/relay/net.address.mjs'
+import { UDPSocketPool } from '../../../src/relay/udp.socket.pool.mjs'
 
 describe('DynamicRelaying', () => {
   let clock
@@ -16,9 +17,13 @@ describe('DynamicRelaying', () => {
 
   it('should create relay', async () => {
     // Given
+    const socketPool = sinon.createStubInstance(UDPSocketPool)
+    socketPool.allocatePort.resolves(10000)
+
     const relayHandler = sinon.createStubInstance(UDPRelayHandler)
     relayHandler.on.callThrough()
     relayHandler.emit.callThrough()
+    sinon.stub(relayHandler, 'socketPool').value(socketPool)
 
     relayHandler.createRelay.resolves(true)
     useDynamicRelay(relayHandler)
@@ -43,10 +48,10 @@ describe('DynamicRelaying', () => {
     clock = sinon.useFakeTimers()
 
     // Then
-    assert(
-      relayHandler.createRelay.calledWith(new RelayEntry({ address: senderAddress })),
-      'Relay was not created!'
-    )
+    const createdRelay = relayHandler.createRelay.lastCall.args[0]
+    assert(createdRelay, 'Relay was not created!')
+    assert.equal(createdRelay.address, senderAddress)
+    assert.equal(createdRelay.port, 10000)
 
     const sent = relayHandler.relay.getCalls().map(call => call.args[0]?.toString())
     messages.forEach(message =>

@@ -47,7 +47,6 @@ export class End2EndContext {
       lines.push(line)
     }
 
-    console.log('Got response', lines.join(''))
     return lines.join('').split('\n')
   }
 

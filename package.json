@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "eslint --ext .mjs src",
     "doc": "jsdoc -c .jsdoc.js src",
-    "test": "node --test test/spec/ | utap",
+    "test": "node --test test/spec/",
     "test:e2e": "node --test test/e2e/ | node scripts/taplog.mjs utap \"pino-pretty -c\"",
     "start": "node bin/noray.mjs | pino-pretty"
   },

@@ -8,6 +8,7 @@ import { NetAddress } from '../../../src/relay/net.address.mjs'
 import { RelayEntry } from '../../../src/relay/relay.entry.mjs'
 import { HostRepository } from '../../../src/hosts/host.repository.mjs'
 import { HostEntity } from '../../../src/hosts/host.entity.mjs'
+import { UDPSocketPool } from '../../../src/relay/udp.socket.pool.mjs'
 
 describe('UDPRemoteRegistrar', () => {
   /** @type {sinon.SinonFakeTimers} */
@@ -23,17 +24,26 @@ describe('UDPRemoteRegistrar', () => {
   /** @type {UDPRemoteRegistrar} */
   let remoteRegistrar
 
-  const host = new HostEntity({
-    oid: 'h0001',
-    pid: 'p0001'
-  })
+  const allocatedPort = 10002
+
+  /** @type {HostEntity} */
+  let host
 
   beforeEach(() => {
+    host = new HostEntity({
+      oid: 'h0001',
+      pid: 'p0001'
+    })
     clock = sinon.useFakeTimers()
 
     hostRepository = sinon.createStubInstance(HostRepository)
     relayHandler = sinon.createStubInstance(UDPRelayHandler)
     socket = sinon.createStubInstance(dgram.Socket)
+
+    const socketPool = sinon.createStubInstance(UDPSocketPool)
+    socketPool.allocatePort.resolves(allocatedPort)
+
+    sinon.stub(relayHandler, 'socketPool').value(socketPool)
 
     hostRepository.findByPid.withArgs(host.pid).returns(host)
     socket.bind.callsArg(2) // Instantly resolve on bind
@@ -60,14 +70,15 @@ describe('UDPRemoteRegistrar', () => {
 
     // Then
     assert.deepEqual(
-      relayHandler.createRelay.lastCall.args[0],
-      new RelayEntry({ address: NetAddress.fromRinfo(rinfo) })
+      relayHandler.createRelay.lastCall?.args?.at(0),
+      new RelayEntry({ address: NetAddress.fromRinfo(rinfo), port: allocatedPort })
     )
     assert.deepEqual(
       socket.send.lastCall?.args,
       ['OK', rinfo.port, rinfo.address]
     )
   })
+
   it('should fail on unknown pid', async () => {
     // Given
     const msg = Buffer.from(host.pid)
