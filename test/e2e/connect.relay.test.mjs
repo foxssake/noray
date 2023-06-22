@@ -27,7 +27,10 @@ describe('Connection', () => {
     /** @type {dgram.Socket} */
     udp: undefined,
 
-    targetRelay: undefined
+    targetRelay: undefined,
+
+    oid: '',
+    pid: ''
   }
 
   before(async () => {
@@ -51,50 +54,32 @@ describe('Connection', () => {
       promiseEvent(client.udp, 'listening')
     ])
 
+    context.log.info('Host bound to UDP port %d', host.udp.address().port)
+    context.log.info('Client bound to UDP port %d', client.udp.address().port)
+
     context.log.info('Startup done')
   })
 
   it('should register host', async () => {
-    // Register host
-    host.tcp.write('register-host\n')
-    const response = await context.read(host.tcp)
+    // Register hosts
+    [host.oid, host.pid] = await context.registerHost(host.tcp)
+    assert(host.oid, 'Failed to get host oid!')
+    assert(host.pid, 'Failed to get host pid!')
 
-    host.oid = response
-      .filter(cmd => cmd.startsWith('set-oid '))
-      .map(cmd => cmd.split(' ')[1])
-      .at(0) ?? fail('Failed to get oid!')
-
-    host.pid = response
-      .filter(cmd => cmd.startsWith('set-pid '))
-      .map(cmd => cmd.split(' ')[1])
-      .at(0) ?? fail('Failed to get pid!')
+    ;[client.oid, client.pid] = await context.registerHost(client.tcp)
+    assert(client.oid, 'Failed to get client oid!')
+    assert(client.pid, 'Failed to get client pid!')
 
     // Register UDP port
-    let relayStatus = undefined
-    host.udp.on('message', (msg, _rinfo) => {
-      context.log.info('Received message: %s', msg.toString())
-      relayStatus = msg.toString('utf8')
-    })
-
-    for (let i = 0; i < 64; ++i) {
-      context.log.info(
-        'Attempt #%d sending pid to registrar port %d',
-        i + 1, config.udpRelay.registrarPort
-      )
-      host.udp.send(host.pid, config.udpRelay.registrarPort)
-      await sleep(0.05)
-
-      if (relayStatus !== undefined) {
-        break
-      }
-    }
-    host.udp.removeAllListeners()
-
-    assert.equal(relayStatus, 'OK')
+    context.log.info('Registering host external address')
+    await context.registerExternal(host.udp, host.pid)
+    context.log.info('Registering client external address')
+    await context.registerExternal(client.udp, client.pid)
   })
 
   it('should reply with relay port', async () => {
     // Request to connect
+    context.log.info('Connecting over relay')
     client.tcp.write(`connect-relay ${host.oid}\n`)
 
     client.targetRelay = (await context.read(client.tcp))
@@ -115,6 +100,7 @@ describe('Connection', () => {
 
     host.udp.on('message', (msg, rinfo) => {
       hostReceived.push(msg.toString())
+      console.log('Host got message', JSON.stringify({ msg: msg.toString(), rinfo }))
       host.udp.send(response, rinfo.port, rinfo.address)
     })
 
@@ -122,10 +108,13 @@ describe('Connection', () => {
       clientReceived.push(msg.toString())
     })
 
+    console.log('Sending initial packet to port ', client.targetRelay)
     client.udp.send(message, client.targetRelay)
 
     // Check if data went through both ways
+    context.log.info('Waiting for messages to go through')
     await sleep(0.1)
+    // TODO: Why tf data not getting through??
     assert.equal(hostReceived.join(''), message)
     assert.equal(clientReceived.join(''), response)
   })

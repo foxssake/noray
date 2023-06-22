@@ -66,7 +66,7 @@ export class ProtocolServer extends events.EventEmitter {
   send (socket, command, data) {
     assert(!command.includes(' '), 'Command can\'t contain spaces!')
     assert(!command.includes('\n'), 'Command can\'t contain newlines!')
-    assert(!data || !data?.includes('\n'), 'Data can\'t contain newlines!')
+    assert(!data || !data?.toString()?.includes('\n'), 'Data can\'t contain newlines!')
 
     socket.write(data
       ? `${command} ${data.toString()}\n`

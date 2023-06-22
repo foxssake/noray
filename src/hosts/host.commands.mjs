@@ -24,7 +24,7 @@ export function handleRegisterHost (hostRepository) {
       log.info(
         { oid: host.oid, pid: host.pid },
         'Registered host from address %s:%d',
-        socket.address().address, socket.address().port
+        socket.remoteAddress, socket.remotePort
       )
 
       socket.on('close', () => {

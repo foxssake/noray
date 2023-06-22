@@ -14,34 +14,20 @@ describe('Connection', () => {
       const host = await context.connect()
       const client = await context.connect()
       
-      context.log.info('Registering parties')
-      host.write('register-host\n')
-      client.write('register-host\n')
-
       // Grab data from responses
-      const hostResult = await context.read(host)
-      const clientResult = await context.read(client)
+      context.log.info('Registering parties')
+      const [oid, pid] = await context.registerHost(host)
+      const [_, clientPid] = await context.registerHost(client)
 
-      const oid = hostResult
-        .filter(cmd => cmd.startsWith('set-oid '))
-        .map(cmd => cmd.split(' ')[1])
-        .at(0) ?? assert.fail('No oid received!')
-
-      const pid = hostResult
-        .filter(cmd => cmd.startsWith('set-pid '))
-        .map(cmd => cmd.split(' ')[1])
-        .at(0) ?? assert.fail('No oid received!')
-
-      const clientPid = clientResult
-        .filter(cmd => cmd.startsWith('set-pid '))
-        .map(cmd => cmd.split(' ')[1])
-        .at(0) ?? assert.fail('No oid received!')
+      assert(oid, 'No oid received!')
+      assert(pid, 'No pid received!')
+      assert(clientPid, 'No client pid received!')
 
       // Register external addresses
       context.log.info('Registering external addresses')
       await Promise.all([
-        context.registerExternal(pid),
-        context.registerExternal(clientPid)
+        context.registerExternal(undefined, pid),
+        context.registerExternal(undefined, clientPid)
       ])
 
       // Send connect request

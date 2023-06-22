@@ -51,33 +51,62 @@ export class End2EndContext {
   }
 
   /**
+  * @param {dgram.Socket} udp
   * @param {string} pid
   */
-  async registerExternal (pid) {
-    const udp = dgram.createSocket('udp4')
-    udp.bind()
-    await promiseEvent(udp, 'listening')
-
+  async registerExternal (udp, pid) {
     let done = false
     let error
-    udp.on('message', (buf, _rinfo) => {
+    const throwaway = udp === undefined
+
+    if (udp === undefined) {
+      udp = dgram.createSocket('udp4')
+      udp.bind()
+      await promiseEvent(udp, 'listening')
+    }
+
+    udp.once('message', (buf, _rinfo) => {
       const msg = buf.toString('utf8')
       done = true
       error = msg !== 'OK' && msg
     })
 
-    while (!done) {
+    for (let i = 0; i < 128 && !done; ++i) {
       udp.send(pid, config.udpRelay.registrarPort)
+      this.log.debug('Sending remote registrar attempt #%d', i+1)
       await sleep(0.1)
     }
 
-    if (error) {
+    if (!done) {
+      throw new Error('Registrar timed out!')
+    } else if (error) {
       throw new Error(error)
     }
 
     const result = udp.address().port
-    udp.close()
+    if (throwaway) {
+      udp.close()
+    }
+
     return result
+  }
+
+  async registerHost (socket) {
+    socket.write('register-host\n')
+
+    const data = await this.read(socket)
+    
+    const oid = data
+      .filter(cmd => cmd.startsWith('set-oid '))
+      .map(cmd => cmd.split(' ')[1])
+      .at(0)
+
+    const pid = data
+      .filter(cmd => cmd.startsWith('set-pid '))
+      .map(cmd => cmd.split(' ')[1])
+      .at(0)
+
+    return [oid, pid]
   }
 
   shutdown () {
