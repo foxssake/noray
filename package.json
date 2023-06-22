@@ -1,6 +1,6 @@
 {
   "name": "@foxssake/noray",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "description": "Online multiplayer orchestrator and potential game platform",
   "main": "src/noray.mjs",
   "bin": {
@@ -11,7 +11,8 @@
     "doc": "jsdoc -c .jsdoc.js src",
     "test": "node --test test/spec/",
     "test:e2e": "node --test test/e2e/ | node scripts/taplog.mjs utap \"pino-pretty -c\"",
-    "start": "node bin/noray.mjs | pino-pretty"
+    "start": "node bin/noray.mjs | pino-pretty",
+    "start:prod": "NODE_ENV=production node bin/noray.mjs"
   },
   "keywords": [],
   "author": "Tamas Galffy",
