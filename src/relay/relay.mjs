@@ -8,8 +8,11 @@ import { formatByteSize, formatDuration } from '../utils.mjs'
 import { UDPRemoteRegistrar } from './udp.remote.registrar.mjs'
 import { hostRepository } from '../hosts/host.mjs'
 import { useDynamicRelay } from './dynamic.relaying.mjs'
+import { UDPSocketPool } from './udp.socket.pool.mjs'
 
-export const udpRelayHandler = new UDPRelayHandler()
+export const udpSocketPool = new UDPSocketPool()
+
+export const udpRelayHandler = new UDPRelayHandler({ socketPool: udpSocketPool })
 constrainRelayTableSize(udpRelayHandler, config.udpRelay.maxSlots)
 
 export const udpRemoteRegistrar = new UDPRemoteRegistrar({
@@ -18,7 +21,7 @@ export const udpRemoteRegistrar = new UDPRemoteRegistrar({
 })
 const log = logger.child({ name: 'mod:relay' })
 
-Noray.hook(noray => {
+Noray.hook(async noray => {
   log.info(
     'Starting periodic UDP relay cleanup job, running every %s',
     formatDuration(config.udpRelay.cleanupInterval)
@@ -30,6 +33,17 @@ Noray.hook(noray => {
 
   log.info('Listening on port %d for UDP remote registrars', config.udpRelay.registrarPort)
   udpRemoteRegistrar.listen(config.udpRelay.registrarPort)
+
+  log.info('Binding %d ports for relaying', config.udpRelay.ports.length)
+
+  for (const port of config.udpRelay.ports) {
+    log.debug('Binding port %d for relay', port)
+    try {
+      await udpSocketPool.allocatePort(port)
+    } catch (err) {
+      log.warn({ err }, 'Failed to bind port %d, ignoring', port)
+    }
+  }
 
   log.info(
     'Limiting relay bandwidth to %s/s and global bandwidth to %s/s',
