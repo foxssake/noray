@@ -47,6 +47,7 @@ export class UDPRelayHandler extends EventEmitter {
   * Create a relay entry.
   *
   * If there's already a relay for the address, returns that.
+  * NOTE: This modifies the incoming relay and returns the same instance.
   * @param {RelayEntry} relay Relay
   * @return {Promise<RelayEntry>} Resulting relay
   * @fires UDPRelayHandler#create
