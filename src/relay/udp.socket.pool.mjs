@@ -52,7 +52,7 @@ export class UDPSocketPool {
   deallocatePort (port) {
     this.#sockets.get(port)?.close()
     this.#sockets.delete(port)
-    this.#freePorts = this.#freePorts.filter(p => p != port)
+    this.#freePorts = this.#freePorts.filter(p => p !== port)
   }
 
   /**
@@ -63,7 +63,6 @@ export class UDPSocketPool {
   getSocket (port) {
     return this.#sockets.get(port)
   }
-
 
   /**
   * Add an already listening socket to use for relaying.

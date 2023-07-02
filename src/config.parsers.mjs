@@ -140,11 +140,11 @@ export function ports (value) {
     .map(([from, offset]) => [from, from + offset])
 
   const result = [...literals, ...absolutes, ...relatives]
-    .flatMap(([from, to]) => 
+    .flatMap(([from, to]) =>
       [...new Array(to - from + 1)].map((_, i) => from + i)
     )
     .sort()
-    .filter((v, i, a) => i == 0 || v != a[i - 1])
+    .filter((v, i, a) => i === 0 || v !== a[i - 1]) // ensure every port is unique
 
   return result.length > 0 ? result : undefined
 }
