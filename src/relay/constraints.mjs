@@ -6,18 +6,6 @@ import assert from 'node:assert'
 import { time } from '../utils.mjs'
 
 /**
-* Limit the relay table size to a given maximum. This ensures that we won't
-* allocate too many relays.
-* @param {UDPRelayHandler} relayHandler Relay handler
-* @param {number} maxSize Maximum relay table size
-*/
-export function constrainRelayTableSize (relayHandler, maxSize) {
-  relayHandler.on('create', () => {
-    assert(relayHandler.relayTable.length <= maxSize, 'Relay table size limit reached!')
-  })
-}
-
-/**
 * Limit the bandwidth on every relay individually.
 * @param {UDPRelayHandler} relayHandler Relay handler
 * @param {number} traffic Traffic limit in bytes/sec

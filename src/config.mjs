@@ -16,7 +16,6 @@ export class NorayConfig {
   }
 
   udpRelay = {
-    maxSlots: number(env.NORAY_UDP_RELAY_MAX_SLOTS) ?? 16384, /* TODO: Remove */
     ports: ports(env.NORAY_UDP_RELAY_PORTS ?? '49152-51200'),
     timeout: duration(env.NORAY_UDP_RELAY_TIMEOUT ?? '30s'),
     cleanupInterval: duration(env.NORAY_UDP_RELAY_CLEANUP_INTERVAL ?? '30s'),

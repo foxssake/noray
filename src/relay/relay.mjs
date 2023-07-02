@@ -1,5 +1,5 @@
 import { config } from '../config.mjs'
-import { constrainGlobalBandwidth, constrainIndividualBandwidth, constrainLifetime, constrainRelayTableSize, constrainTraffic } from './constraints.mjs'
+import { constrainGlobalBandwidth, constrainIndividualBandwidth, constrainLifetime, constrainTraffic } from './constraints.mjs'
 import { UDPRelayHandler } from './udp.relay.handler.mjs'
 import { Noray } from '../noray.mjs'
 import { cleanupUdpRelayTable } from './udp.relay.cleanup.mjs'
@@ -13,7 +13,6 @@ import { UDPSocketPool } from './udp.socket.pool.mjs'
 export const udpSocketPool = new UDPSocketPool()
 
 export const udpRelayHandler = new UDPRelayHandler({ socketPool: udpSocketPool })
-constrainRelayTableSize(udpRelayHandler, config.udpRelay.maxSlots)
 
 export const udpRemoteRegistrar = new UDPRemoteRegistrar({
   hostRepository,

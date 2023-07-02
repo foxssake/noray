@@ -114,7 +114,6 @@ describe('Connection', () => {
     // Check if data went through both ways
     context.log.info('Waiting for messages to go through')
     await sleep(0.1)
-    // TODO: Why tf data not getting through??
     assert.equal(hostReceived.join(''), message)
     assert.equal(clientReceived.join(''), response)
   })
