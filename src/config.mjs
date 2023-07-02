@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv'
-import { byteSize, duration, integer, number } from './config.parsers.mjs'
+import { byteSize, duration, integer, number, ports } from './config.parsers.mjs'
 import logger, { getLogLevel } from './logger.mjs'
 
 dotenv.config()
@@ -16,7 +16,8 @@ export class NorayConfig {
   }
 
   udpRelay = {
-    maxSlots: number(env.NORAY_UDP_RELAY_MAX_SLOTS) ?? 16384,
+    maxSlots: number(env.NORAY_UDP_RELAY_MAX_SLOTS) ?? 16384, /* TODO: Remove */
+    ports: ports(env.NORAY_UDP_RELAY_PORTS ?? '49152-51200'),
     timeout: duration(env.NORAY_UDP_RELAY_TIMEOUT ?? '30s'),
     cleanupInterval: duration(env.NORAY_UDP_RELAY_CLEANUP_INTERVAL ?? '30s'),
     registrarPort: number(env.NORAY_UDP_REGISTRAR_PORT) ?? 8809,

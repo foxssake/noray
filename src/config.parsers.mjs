@@ -139,12 +139,6 @@ export function ports (value) {
     .filter(r => !r.includes(undefined))
     .map(([from, offset]) => [from, from + offset])
 
-  console.log(value, [...literals, ...absolutes, ...relatives]
-    .flatMap(([from, to]) => 
-      [...new Array(to - from + 1)].map((_, i) => from + i)
-    )
-  )
-
   const result = [...literals, ...absolutes, ...relatives]
     .flatMap(([from, to]) => 
       [...new Array(to - from + 1)].map((_, i) => from + i)
