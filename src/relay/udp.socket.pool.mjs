@@ -36,7 +36,7 @@ export class UDPSocketPool {
     return new Promise((resolve, reject) => {
       const socket = dgram.createSocket('udp4')
       socket.once('error', reject)
-      socket.bind(port, () => {
+      socket.bind(port ?? 0, () => {
         port = this.addSocket(socket)
         resolve(port)
       })
