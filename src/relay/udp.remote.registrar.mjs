@@ -92,15 +92,13 @@ export class UDPRemoteRegistrar {
       }
 
       host.rinfo = rinfo
-      const port = await this.#udpRelayHandler.socketPool.allocatePort()
-      host.relay = port
-      await this.#udpRelayHandler.createRelay(new RelayEntry({
-        address: NetAddress.fromRinfo(rinfo),
-        port
+      const relay = await this.#udpRelayHandler.createRelay(new RelayEntry({
+        address: NetAddress.fromRinfo(rinfo)
       }))
+      host.relay = relay.port
 
       log.info(
-        { host, port },
+        { host, port: relay.port },
         'Created relay for host'
       )
 

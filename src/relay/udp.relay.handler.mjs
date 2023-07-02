@@ -45,9 +45,10 @@ export class UDPRelayHandler extends EventEmitter {
 
   /**
   * Create a relay entry.
+  *
+  * If there's already a relay for the address, returns that.
   * @param {RelayEntry} relay Relay
-  * @return {Promise<boolean>} True if the entry was created, false if it
-  * already exists
+  * @return {Promise<RelayEntry>} Resulting relay
   * @fires UDPRelayHandler#create
   */
   async createRelay (relay) {
@@ -55,7 +56,7 @@ export class UDPRelayHandler extends EventEmitter {
     if (this.hasRelay(relay)) {
       // We already have this relay entry
       log.trace({ relay }, 'Relay already exists, ignoring')
-      return false
+      return this.#relayTable.find(e => e.equals(relay))
     }
 
     relay.port = this.#socketPool.getPort()
@@ -72,7 +73,7 @@ export class UDPRelayHandler extends EventEmitter {
     this.#relayTable.push(relay)
     log.trace({ relay }, 'Relay created')
 
-    return true
+    return relay
   }
 
   /**

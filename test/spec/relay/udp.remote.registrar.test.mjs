@@ -24,8 +24,6 @@ describe('UDPRemoteRegistrar', () => {
   /** @type {UDPRemoteRegistrar} */
   let remoteRegistrar
 
-  const allocatedPort = 10002
-
   /** @type {HostEntity} */
   let host
 
@@ -39,11 +37,6 @@ describe('UDPRemoteRegistrar', () => {
     hostRepository = sinon.createStubInstance(HostRepository)
     relayHandler = sinon.createStubInstance(UDPRelayHandler)
     socket = sinon.createStubInstance(dgram.Socket)
-
-    const socketPool = sinon.createStubInstance(UDPSocketPool)
-    socketPool.allocatePort.resolves(allocatedPort)
-
-    sinon.stub(relayHandler, 'socketPool').value(socketPool)
 
     hostRepository.findByPid.withArgs(host.pid).returns(host)
     socket.bind.callsArg(2) // Instantly resolve on bind
@@ -65,18 +58,24 @@ describe('UDPRemoteRegistrar', () => {
     await remoteRegistrar.listen()
     const messageHandler = socket.on.lastCall.callback
 
+    relayHandler.createRelay.resolves({
+      address: NetAddress.fromRinfo(rinfo),
+      port: 32768
+    })
+
     // When
     await messageHandler(msg, rinfo)
 
     // Then
     assert.deepEqual(
       relayHandler.createRelay.lastCall?.args?.at(0),
-      new RelayEntry({ address: NetAddress.fromRinfo(rinfo), port: allocatedPort })
+      new RelayEntry({ address: NetAddress.fromRinfo(rinfo) })
     )
     assert.deepEqual(
       socket.send.lastCall?.args,
       ['OK', rinfo.port, rinfo.address]
     )
+    assert.equal(host.relay, 32768)
   })
 
   it('should fail on unknown pid', async () => {
