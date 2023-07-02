@@ -78,6 +78,9 @@ Noray.hook(async noray => {
     log.info('Closing UDP remote registrar socket')
     udpRemoteRegistrar.socket.close()
 
+    log.info('Closing socket pool')
+    udpSocketPool.clear()
+
     log.info('Closing relay handler')
     udpRelayHandler.clear()
   })

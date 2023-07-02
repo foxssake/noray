@@ -113,6 +113,14 @@ export class UDPSocketPool {
   }
 
   /**
+  * Close all sockets managed by this pool, freeing up all associated system
+  * resources.
+  */
+  clear () {
+    [...this.#sockets.keys()].forEach(port => this.deallocatePort(port))
+  }
+
+  /**
   * Allocated ports.
   * @type {number[]}
   */
