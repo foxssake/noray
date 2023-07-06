@@ -68,7 +68,7 @@ export function handleConnectRelay (hostRepository) {
       host.relay ??= await getRelay(host.rinfo)
       client.relay ??= await getRelay(client.rinfo)
 
-      log.debug({ relay: hostRelay.port }, 'Replying with relay')
+      log.debug({ host: host.relay, client: client.relay }, 'Replying with relay')
       server.send(socket, 'connect-relay', host.relay)
       server.send(host.socket, 'connect-relay', client.relay)
       log.debug(
@@ -84,7 +84,12 @@ function stringifyAddress (address) {
 }
 
 async function getRelay (rinfo) {
-  return (await udpRelayHandler.createRelay(
-    new RelayEntry({ address: NetAddress.fromRinfo(rinfo) }))
-  ).port
+  const log = logger.child({ name: 'getRelay' })
+  log.trace({ rinfo }, 'Ensuring relay for remote')
+  const relayEntry = await udpRelayHandler.createRelay(
+    new RelayEntry({ address: NetAddress.fromRinfo(rinfo) })
+  )
+
+  log.trace({ relayEntry }, 'Created relay, returning with port %d', relayEntry.port)
+  return relayEntry.port
 }
