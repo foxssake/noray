@@ -65,8 +65,8 @@ export function handleConnectRelay (hostRepository) {
       assert(client, 'Unknown client from address')
 
       log.debug('Ensuring relay for both parties')
-      host.relay ??= await getRelay(host.rinfo)
-      client.relay ??= await getRelay(client.rinfo)
+      host.relay = await getRelay(host.rinfo)
+      client.relay = await getRelay(client.rinfo)
 
       log.debug({ host: host.relay, client: client.relay }, 'Replying with relay')
       server.send(socket, 'connect-relay', host.relay)
@@ -84,6 +84,9 @@ function stringifyAddress (address) {
 }
 
 async function getRelay (rinfo) {
+  // Attempt to create new relay on each connect
+  // If there's a relay already, UDPRelayHandler will return that
+  // If there's no relay, or it has expired, a new one will be created
   const log = logger.child({ name: 'getRelay' })
   log.trace({ rinfo }, 'Ensuring relay for remote')
   const relayEntry = await udpRelayHandler.createRelay(
