@@ -4,6 +4,9 @@ import { HostRepository } from '../hosts/host.repository.mjs'
 /* eslint-enable */
 import assert from 'node:assert'
 import logger from '../logger.mjs'
+import { udpRelayHandler } from '../relay/relay.mjs'
+import { RelayEntry } from '../relay/relay.entry.mjs'
+import { NetAddress } from '../relay/net.address.mjs'
 
 /**
 * @param {HostRepository} hostRepository
@@ -48,7 +51,7 @@ export function handleConnectRelay (hostRepository) {
   * @param {ProtocolServer} server
   */
   return function (server) {
-    server.on('connect-relay', (data, socket) => {
+    server.on('connect-relay', async (data, socket) => {
       const log = logger.child({ name: 'cmd:connect-relay' })
 
       const oid = data
@@ -59,11 +62,13 @@ export function handleConnectRelay (hostRepository) {
         'Client attempting to connect to host'
       )
       assert(host, 'Unknown host oid: ' + oid)
-      assert(host.relay, 'Host has no relay!')
       assert(client, 'Unknown client from address')
-      assert(client.relay, 'Client has no relay!')
 
-      log.debug({ relay: host.relay }, 'Replying with relay')
+      log.debug('Ensuring relay for both parties')
+      host.relay ??= await getRelay(host.rinfo)
+      client.relay ??= await getRelay(client.rinfo)
+
+      log.debug({ relay: hostRelay.port }, 'Replying with relay')
       server.send(socket, 'connect-relay', host.relay)
       server.send(host.socket, 'connect-relay', client.relay)
       log.debug(
@@ -76,4 +81,10 @@ export function handleConnectRelay (hostRepository) {
 
 function stringifyAddress (address) {
   return `${address.address}:${address.port}`
+}
+
+async function getRelay (rinfo) {
+  return (await udpRelayHandler.createRelay(
+    new RelayEntry({ address: NetAddress.fromRinfo(rinfo) }))
+  ).port
 }

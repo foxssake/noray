@@ -85,23 +85,13 @@ export class UDPRemoteRegistrar {
       const host = this.#hostRepository.findByPid(pid)
       assert(host, 'Unknown host pid!')
 
-      if (host.relay) {
-        // Host has already a relay
+      if (host.rinfo) {
+        // Host has already remote info registered
         this.#socket.send('OK', rinfo.port, rinfo.address)
         return
       }
 
       host.rinfo = rinfo
-      const relay = await this.#udpRelayHandler.createRelay(new RelayEntry({
-        address: NetAddress.fromRinfo(rinfo)
-      }))
-      host.relay = relay.port
-
-      log.info(
-        { host, port: relay.port },
-        'Created relay for host'
-      )
-
       this.#socket.send('OK', rinfo.port, rinfo.address)
     } catch (e) {
       this.#socket.send(e.message ?? 'Error', rinfo.port, rinfo.address)
