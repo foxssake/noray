@@ -15,6 +15,11 @@ export class NorayConfig {
     port: integer(env.NORAY_SOCKET_PORT) ?? 8890
   }
 
+  http = {
+    host: env.NORAY_HTTP_HOST ?? '::1',
+    port: integer(env.NORAY_HTTP_PORT) ?? 8891
+  }
+
   udpRelay = {
     ports: ports(env.NORAY_UDP_RELAY_PORTS ?? '49152-51200'),
     timeout: duration(env.NORAY_UDP_RELAY_TIMEOUT ?? '30s'),

@@ -1,25 +1,36 @@
 import * as http from 'node:http'
 import { Noray } from '../noray.mjs'
 import logger from '../logger.mjs'
+import * as prometheus from 'prom-client'
+import { config } from '../config.mjs'
 
 const log = logger.child({ name: 'mod:metrics' })
 
+export const metricsRegistry = new prometheus.Registry()
+
 Noray.hook(noray => {
+  log.info('Collecting default metrics')
+  prometheus.collectDefaultMetrics({
+    register: metricsRegistry
+  })
+
   log.info('Starting HTTP server to serve metrics')
 
   const httpServer = new http.Server()
-  httpServer.on('request', (req, res) => {
+  httpServer.on('request', async (req, res) => {
     if (req.url !== '/metrics') {
       res.statusCode = 404
       res.end()
       return
     }
 
-    res.write('up=yes')
+    res.write(await metricsRegistry.metrics())
     res.end()
   })
 
-  httpServer.listen(3000, () => log.info('Serving metrics over HTTP on port %d', 3000))
+  httpServer.listen(config.http.port, config.http.host,
+    () => log.info('Serving metrics over HTTP on port %s:%d', config.http.host, config.http.port)
+  )
 
   noray.on('close', () => {
     log.info('noray closing, shutting down HTTP server')
