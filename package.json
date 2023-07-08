@@ -1,6 +1,6 @@
 {
   "name": "@foxssake/noray",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Online multiplayer orchestrator and potential game platform",
   "main": "src/noray.mjs",
   "bin": {
