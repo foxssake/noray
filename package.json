@@ -1,6 +1,6 @@
 {
   "name": "@foxssake/noray",
-  "version": "0.22.2",
+  "version": "0.22.3",
   "description": "Online multiplayer orchestrator and potential game platform",
   "main": "src/noray.mjs",
   "bin": {
@@ -14,9 +14,14 @@
     "start": "node bin/noray.mjs | pino-pretty",
     "start:prod": "NODE_ENV=production node bin/noray.mjs"
   },
-  "keywords": [],
+  "keywords": ["online", "multiplayer", "orchestrator", "relay", "nat"],
   "author": "Tamas Galffy",
   "license": "MIT",
+  "repository": "github:foxssake/noray",
+  "homepage": "https://github.com/foxssake/noray",
+  "bugs": {
+    "url": "https://github.com/foxssake/noray/issues"
+  },
   "devDependencies": {
     "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
@@ -32,5 +37,9 @@
     "dotenv": "^16.0.3",
     "nanoid": "^4.0.1",
     "pino": "^8.11.0"
-  }
+  },
+  "files": [
+    "src/*",
+    "bin/*"
+  ]
 }
