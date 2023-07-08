@@ -35,12 +35,6 @@ const activeRelayGauge = new prometheus.Gauge({
   registers: [metricsRegistry]
 })
 
-const expiredRelayCounter = new prometheus.Counter({
-  name: 'noray_relay_expired',
-  help: 'Count of expired relays',
-  registers: [metricsRegistry]
-})
-
 /**
 * Class implementing the actual relay logic.
 *
