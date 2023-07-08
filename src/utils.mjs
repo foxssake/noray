@@ -56,8 +56,8 @@ export function asSingletonFactory (f) {
 * **NOTE** that the cache is not limited in any way, use only in cases where
 * the possible number of parameters is limited.
 *
-* @param {(...args: any[]): T} f Function
-* @returns {(...args: any[]): T} Memoized function
+* @param {function(): T} f Function
+* @returns {function(): T} Memoized function
 * @template T
 */
 export function memoize (f) {
