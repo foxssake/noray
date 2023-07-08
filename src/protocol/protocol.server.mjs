@@ -7,7 +7,6 @@ import assert from 'node:assert'
 import logger from '../logger.mjs'
 import * as prometheus from 'prom-client'
 import { metricsRegistry } from '../metrics/metrics.registry.mjs'
-import { memoize } from '../utils.mjs'
 
 const log = logger.child({ name: 'ProtocolServer' })
 
