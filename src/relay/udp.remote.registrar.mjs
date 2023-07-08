@@ -5,8 +5,28 @@ import dgram from 'node:dgram'
 import assert from 'node:assert'
 import logger from '../logger.mjs'
 import { requireParam } from '../assertions.mjs'
+import * as prometheus from 'prom-client'
+import { metricsRegistry } from '../metrics/metrics.registry.mjs'
 
 const log = logger.child({ name: 'UDPRemoteRegistrar' })
+
+const registerSuccessCounter = new prometheus.Counter({
+  name: 'noray_remote_registrar_success',
+  help: 'Number of successful remote address registrations',
+  registers: [metricsRegistry]
+})
+
+const registerFailCounter = new prometheus.Counter({
+  name: 'noray_remote_registrar_fail',
+  help: 'Number of failed remote address registrations',
+  registers: [metricsRegistry]
+})
+
+const registerRepatCounter = new prometheus.Counter({
+  name: 'noray_remote_registrar_repeat',
+  help: 'Number of redundant remote address registrations',
+  registers: [metricsRegistry]
+})
 
 /**
 * @summary Class for remote address registration over UDP.
@@ -80,12 +100,15 @@ export class UDPRemoteRegistrar {
       if (host.rinfo) {
         // Host has already remote info registered
         this.#socket.send('OK', rinfo.port, rinfo.address)
+        registerRepatCounter.inc()
         return
       }
 
       host.rinfo = rinfo
       this.#socket.send('OK', rinfo.port, rinfo.address)
+      registerSuccessCounter.inc()
     } catch (e) {
+      registerFailCounter.inc()
       this.#socket.send(e.message ?? 'Error', rinfo.port, rinfo.address)
     }
   }
