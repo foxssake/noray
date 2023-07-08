@@ -6,8 +6,40 @@ import { UDPSocketPool } from './udp.socket.pool.mjs'
 import { time } from '../utils.mjs'
 import { EventEmitter } from 'node:events'
 import logger from '../logger.mjs'
+import * as prometheus from 'prom-client'
+import { metricsRegistry } from '../metrics/metrics.registry.mjs'
 
 const log = logger.child({ name: 'UDPRelayHandler' })
+
+const relayDurationHistogram = new prometheus.Histogram({
+  name: 'noray_relay_duration',
+  help: 'Time it takes to relay a packet',
+  registers: [metricsRegistry]
+})
+
+const relaySizeHistorgram = new prometheus.Histogram({
+  name: 'noray_relay_size',
+  help: 'Size of the packet being relayed',
+  registers: [metricsRegistry]
+})
+
+const relayDropCounter = new prometheus.Counter({
+  name: 'noray_relay_drop_count',
+  help: 'Number of relay packets dropped',
+  registers: [metricsRegistry]
+})
+
+const activeRelayGauge = new prometheus.Gauge({
+  name: 'noray_relay_count',
+  help: 'Count of currently active relays',
+  registers: [metricsRegistry]
+})
+
+const expiredRelayCounter = new prometheus.Counter({
+  name: 'noray_relay_expired',
+  help: 'Count of expired relays',
+  registers: [metricsRegistry]
+})
 
 /**
 * Class implementing the actual relay logic.
@@ -74,6 +106,8 @@ export class UDPRelayHandler extends EventEmitter {
     this.#relayTable.push(relay)
     log.trace({ relay }, 'Relay created')
 
+    activeRelayGauge.inc()
+
     return relay
   }
 
@@ -104,6 +138,9 @@ export class UDPRelayHandler extends EventEmitter {
 
     this.#socketPool.returnPort(relay.port)
     this.#relayTable = this.#relayTable.filter((_, i) => i !== idx)
+
+    activeRelayGauge.dec()
+
     return true
   }
 
@@ -112,6 +149,8 @@ export class UDPRelayHandler extends EventEmitter {
   */
   clear () {
     this.relayTable.forEach(entry => this.freeRelay(entry))
+
+    activeRelayGauge.reset()
   }
 
   /**
@@ -124,6 +163,8 @@ export class UDPRelayHandler extends EventEmitter {
   * @fires UDPRelayHandler#drop
   */
   relay (msg, sender, target) {
+    const measure = relayDurationHistogram.startTimer()
+
     const senderRelay = this.#relayTable.find(r =>
       r.address.port === sender.port && r.address.address === sender.address
     )
@@ -132,6 +173,10 @@ export class UDPRelayHandler extends EventEmitter {
     if (!senderRelay || !targetRelay) {
       // We don't have a relay for the sender, target, or both
       this.emit('drop', senderRelay, targetRelay, sender, target, msg)
+
+      relayDropCounter.inc()
+      measure()
+
       return false
     }
 
@@ -148,6 +193,9 @@ export class UDPRelayHandler extends EventEmitter {
     // Keep track of traffic timings
     senderRelay.lastReceived = time()
     targetRelay.lastSent = time()
+
+    relaySizeHistorgram.observe(msg?.byteLength ?? 0)
+    measure()
 
     return true
   }
