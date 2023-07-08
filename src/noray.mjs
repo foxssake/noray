@@ -5,11 +5,11 @@ import { config } from './config.mjs'
 import { ProtocolServer } from './protocol/protocol.server.mjs'
 
 const defaultModules = [
+  'metrics/metrics.mjs',
   'relay/relay.mjs',
   'echo/echo.mjs',
   'hosts/host.mjs',
   'connection/connection.mjs',
-  'metrics/metrics.mjs'
 ]
 
 const hooks = []

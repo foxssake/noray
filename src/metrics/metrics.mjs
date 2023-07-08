@@ -3,10 +3,9 @@ import { Noray } from '../noray.mjs'
 import logger from '../logger.mjs'
 import * as prometheus from 'prom-client'
 import { config } from '../config.mjs'
+import { metricsRegistry } from './metrics.registry.mjs'
 
 const log = logger.child({ name: 'mod:metrics' })
-
-export const metricsRegistry = new prometheus.Registry()
 
 Noray.hook(noray => {
   log.info('Collecting default metrics')

@@ -4,7 +4,7 @@ import { HostRepository } from './host.repository.mjs'
 import { HostEntity } from './host.entity.mjs'
 import logger from '../logger.mjs'
 import * as prometheus from 'prom-client'
-import { metricsRegistry } from '../metrics/metrics.mjs'
+import { metricsRegistry } from '../metrics/metrics.registry.mjs'
 
 const activeHostsGauge = new prometheus.Gauge({
   name: 'noray_active_hosts',

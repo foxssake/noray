@@ -1,9 +1,45 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
 import sinon from 'sinon'
-import { Timeout, combine, formatByteSize, formatDuration, range, sleep, withTimeout } from '../../src/utils.mjs'
+import { Timeout, combine, formatByteSize, formatDuration, memoize, range, sleep, withTimeout } from '../../src/utils.mjs'
 
 describe('utils', () => {
+  describe('memoized', () => {
+    it('should not call again with same params', () => {
+      // Given
+      const expected = 4
+      const fn = sinon.mock()
+      fn.returns(expected)
+
+      const mfn = memoize(fn)
+
+      // When
+      mfn(16)
+      const actual = mfn(16)
+
+      // Then
+      assert.equal(actual, expected)
+      assert(fn.calledOnce)
+      assert(fn.calledOnceWith(16))
+    })
+
+    it('should call through on unknown', () => {
+      // Given
+      const fn = sinon.mock()
+      fn.twice().returns()
+      const mfn = memoize(fn)
+
+      // When
+      mfn(16)
+      mfn(32)
+
+      // Then
+      assert(fn.calledTwice)
+      assert(fn.calledWith(16))
+      assert(fn.calledWith(32))
+    })
+  })
+
   describe('withTimeout', () => {
     /** @type {sinon.SinonFakeTimers} */
     let clock

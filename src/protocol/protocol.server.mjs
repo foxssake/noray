@@ -5,8 +5,31 @@ import * as readline from 'node:readline'
 import * as events from 'node:events'
 import assert from 'node:assert'
 import logger from '../logger.mjs'
+import * as prometheus from 'prom-client'
+import { metricsRegistry } from '../metrics/metrics.registry.mjs'
+import { memoize } from '../utils.mjs'
 
 const log = logger.child({ name: 'ProtocolServer' })
+
+const durationHistogram = new prometheus.Histogram({
+  name: 'noray_command_duration',
+  help: 'Duration of each command',
+  labelNames: ['command'],
+  registers: [metricsRegistry]
+})
+
+const exceptionsCounter = new prometheus.Counter({
+  name: 'noray_command_exception',
+  help: 'Exceptions encountered processing command',
+  labelNames: ['command'],
+  registers: [metricsRegistry]
+})
+
+const activeConnectionGauge = new prometheus.Gauge({
+  name: 'noray_tcp_connections',
+  help: 'Number of currently active TCP connections',
+  registers: [metricsRegistry]
+})
 
 /**
 * Protocol implementation.
@@ -36,6 +59,8 @@ export class ProtocolServer extends events.EventEmitter {
 
     rl.on('line', line => this.#handleLine(socket, line))
     this.#readers.set(socket, rl)
+
+    activeConnectionGauge.inc()
   }
 
   /**
@@ -45,6 +70,8 @@ export class ProtocolServer extends events.EventEmitter {
   detach (socket) {
     this.#readers.get(socket)?.close()
     this.#readers.delete(socket)
+
+    activeConnectionGauge.dec()
   }
 
   /**
@@ -78,20 +105,26 @@ export class ProtocolServer extends events.EventEmitter {
   * @param {net.Socket} socket
   * @param {string} line
   */
-  #handleLine (socket, line) {
+  async #handleLine (socket, line) {
     const idx = line.indexOf(' ')
 
     const [command, data] = idx >= 0
       ? [line.slice(0, idx), line.slice(idx + 1)]
       : [line, '']
 
+    const measure = durationHistogram.startTimer({ command })
     try {
-      this.emit(command, data, socket)
+      await Promise.all(
+        this.listeners(command).map(l => l(data, socket))
+      )
     } catch (err) {
       log.warn(
         { line, err },
         'Error handling line'
       )
+      exceptionsCounter.inc({ command })
+    } finally {
+      measure()
     }
   }
 }
