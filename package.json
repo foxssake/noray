@@ -14,7 +14,13 @@
     "start": "node bin/noray.mjs | pino-pretty",
     "start:prod": "NODE_ENV=production node bin/noray.mjs"
   },
-  "keywords": ["online", "multiplayer", "orchestrator", "relay", "nat"],
+  "keywords": [
+    "online",
+    "multiplayer",
+    "orchestrator",
+    "relay",
+    "nat"
+  ],
   "author": "Tamas Galffy",
   "license": "MIT",
   "repository": "github:foxssake/noray",
@@ -36,7 +42,8 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "nanoid": "^4.0.1",
-    "pino": "^8.11.0"
+    "pino": "^8.11.0",
+    "prom-client": "^14.2.0"
   },
   "files": [
     "src/*",

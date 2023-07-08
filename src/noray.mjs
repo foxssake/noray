@@ -8,7 +8,8 @@ const defaultModules = [
   'relay/relay.mjs',
   'echo/echo.mjs',
   'hosts/host.mjs',
-  'connection/connection.mjs'
+  'connection/connection.mjs',
+  'metrics/metrics.mjs'
 ]
 
 const hooks = []
