@@ -1,15 +1,12 @@
 /* eslint-disable */
-import { UDPRelayHandler } from './udp.relay.handler.mjs'
 import { HostRepository } from '../hosts/host.repository.mjs'
 /* eslint-enable */
 import dgram from 'node:dgram'
 import assert from 'node:assert'
-import { RelayEntry } from './relay.entry.mjs'
-import { NetAddress } from './net.address.mjs'
+import logger from '../logger.mjs'
 import { requireParam } from '../assertions.mjs'
 import * as prometheus from 'prom-client'
 import { metricsRegistry } from '../metrics/metrics.registry.mjs'
-import logger from '../logger.mjs'
 
 const log = logger.child({ name: 'UDPRemoteRegistrar' })
 
@@ -49,19 +46,14 @@ export class UDPRemoteRegistrar {
   /** @type {HostRepository} */
   #hostRepository
 
-  /** @type {UDPRelayHandler} */
-  #udpRelayHandler
-
   /**
   * Construct instance.
   * @param {object} options Options
   * @param {HostRepository} options.hostRepository Host repository
-  * @param {UDPRelayHandler} options.udpRelayHandler UDP relay handler
   * @param {dgram.Socket} [options.socket] Socket
   */
   constructor (options) {
     this.#hostRepository = requireParam(options.hostRepository)
-    this.#udpRelayHandler = requireParam(options.udpRelayHandler)
     this.#socket = options.socket ?? dgram.createSocket('udp4')
   }
 
@@ -105,24 +97,14 @@ export class UDPRemoteRegistrar {
       const host = this.#hostRepository.findByPid(pid)
       assert(host, 'Unknown host pid!')
 
-      if (host.relay) {
-        // Host has already a relay
+      if (host.rinfo) {
+        // Host has already remote info registered
         this.#socket.send('OK', rinfo.port, rinfo.address)
         registerRepatCounter.inc()
         return
       }
 
       host.rinfo = rinfo
-      const relay = await this.#udpRelayHandler.createRelay(new RelayEntry({
-        address: NetAddress.fromRinfo(rinfo)
-      }))
-      host.relay = relay.port
-
-      log.info(
-        { host, port: relay.port },
-        'Created relay for host'
-      )
-
       this.#socket.send('OK', rinfo.port, rinfo.address)
       registerSuccessCounter.inc()
     } catch (e) {
