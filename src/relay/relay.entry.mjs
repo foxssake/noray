@@ -51,7 +51,7 @@ export class RelayEntry {
   * @returns {boolean} True if equal
   */
   equals (other) {
-    return this.address.equals(other.address) && this.port === other.port
+    return this.address.equals(other.address)
   }
 
   /**

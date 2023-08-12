@@ -260,4 +260,69 @@ describe('UDPRelayHandler', () => {
       assert(socket.send.notCalled, 'Message sent?')
     })
   })
+  describe('hasRelay', () => {
+    it('should not have relay', async () => {
+      // Given
+      const socket = sinon.createStubInstance(dgram.Socket)
+      const socketPool = sinon.createStubInstance(UDPSocketPool)
+      socketPool.getPort.returns(10001)
+      socketPool.getPort.returns(10002)
+      socketPool.getSocket.returns(socket)
+      socket.removeAllListeners.returnsThis()
+
+      const createdRelay = new RelayEntry({
+        address: new NetAddress({
+          address: '88.57.0.107',
+          port: 32279
+        })
+      })
+
+      const testRelay = new RelayEntry({
+        address: new NetAddress({
+          address: '88.57.0.107',
+          port: 49152
+        })
+      })
+
+      const relayHandler = new UDPRelayHandler({
+        socketPool
+      })
+
+      await relayHandler.createRelay(createdRelay)
+
+      // When + Then
+      assert(!relayHandler.hasRelay(testRelay))
+    })
+    it('should have relay', async () => {
+      // Given
+      const socket = sinon.createStubInstance(dgram.Socket)
+      const socketPool = sinon.createStubInstance(UDPSocketPool)
+      socketPool.getPort.onFirstCall().returns(10001)
+      socketPool.getPort.onSecondCall().returns(10002)
+      socketPool.getSocket.returns(socket)
+      socket.removeAllListeners.returnsThis()
+
+      const createdRelay = new RelayEntry({
+        address: new NetAddress({
+          address: '88.57.0.107',
+          port: 32279
+        })
+      })
+
+      const testRelay = new RelayEntry({
+        address: new NetAddress({
+          address: '88.57.0.107',
+          port: 32279
+        })
+      })
+      const relayHandler = new UDPRelayHandler({
+        socketPool
+      })
+
+      await relayHandler.createRelay(createdRelay)
+
+      // When + Then
+      assert(relayHandler.hasRelay(testRelay))
+    })
+  })
 })

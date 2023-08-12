@@ -209,14 +209,6 @@ export class UDPRelayHandler extends EventEmitter {
   get relayTable () {
     return [...this.#relayTable]
   }
-
-  async #ensurePort (port) {
-    if (!this.#socketPool.getSocket(port)) {
-      await this.#socketPool.allocatePort(port)
-    }
-
-    return this.#socketPool.getSocket(port)
-  }
 }
 
 /**
