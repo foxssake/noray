@@ -58,20 +58,20 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Log in to the Container registry
-        uses: docker/login-action
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      uses: docker/login-action
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action
-        with:
-          images: ghcr.io/${{ github.repository }}
+      id: meta
+      uses: docker/metadata-action
+      with:
+        images: ghcr.io/${{ github.repository }}
     - name: Build and push Docker image
-        uses: docker/build-push-action
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      uses: docker/build-push-action
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
