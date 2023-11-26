@@ -2,7 +2,6 @@ name: Docker Publish
 
 on:
   push:
-#    branches: [ "main" ]
 
 jobs:
 # From https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
@@ -29,6 +28,6 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        push: true
+        push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
