@@ -11,9 +11,14 @@ const env = process.env
 * Noray configuration type.
 */
 export class NorayConfig {
-  randomId = {
-    length: env.NORAY_RANDOM_ID_LENGTH ?? 21,
-    letters: env.NORAY_RANDOM_ID_LETTERS ?? urlAlphabet
+  oid = {
+    length: env.NORAY_OID_LENGTH ?? 21,
+    charset: env.NORAY_OID_CHARSET ?? urlAlphabet
+  }
+
+  pid = {
+    length: env.NORAY_PID_LENGTH ?? 128,
+    charset: env.NORAY_PID_CHARSET ?? urlAlphabet
   }
 
   socket = {
