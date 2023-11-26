@@ -80,7 +80,7 @@ docker run --env-file=.env -t noray
 
 Or run prebuild docker:
 ```
-docker run --env-file=.env -t foxssake/noray
+docker run --env-file=.env -t ghcr.io/foxssake/noray
 ```
 
 ## Documentation
