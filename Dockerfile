@@ -1,8 +1,8 @@
 FROM node:18-bullseye
 # From https://github.com/pnpm/pnpm/issues/4837
 
-EXPOSE 3000/tcp
-EXPOSE 3000/udp
+EXPOSE 8890/tcp
+EXPOSE 8891/udp
 
 COPY ./package.json .
 
