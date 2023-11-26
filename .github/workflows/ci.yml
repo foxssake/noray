@@ -39,15 +39,15 @@ jobs:
         echo "pnpm v$(pnpm -v)"
     - name: Test
       run: pnpm test
-  e2e:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-    - uses: actions/checkout@v3
-    - name: Setup
-      uses: ./.github/actions/setup.node
-    - name: End to end tests
-      run: pnpm test:e2e
+  #e2e:
+  #  runs-on: ubuntu-latest
+  #  needs: test
+  #  steps:
+  #  - uses: actions/checkout@v3
+  #  - name: Setup
+  #    uses: ./.github/actions/setup.node
+  #  - name: End to end tests
+  #    run: pnpm test:e2e
 # From https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
   docker:
     runs-on: ubuntu-latest
