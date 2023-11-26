@@ -1,4 +1,5 @@
 FROM node:18-bullseye
+# From https://github.com/pnpm/pnpm/issues/4837
 
 EXPOSE 3000/tcp
 EXPOSE 3000/udp
