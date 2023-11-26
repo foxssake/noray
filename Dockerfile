@@ -16,8 +16,6 @@ RUN npm i -g npm@latest; \
  export PATH="$PNPM_HOME:$PATH"; \
  pnpm bin -g &&\
  # Install dependencies
- pnpm add -g pm2 &&\
- pnpm add -g @nestjs/cli &&\
  pnpm install
 
 COPY . .
