@@ -58,20 +58,22 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Log in to the Container registry
-      uses: docker/login-action
+      #if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action
+      uses: docker/metadata-action@v5
       with:
         images: ghcr.io/${{ github.repository }}
     - name: Build and push Docker image
-      uses: docker/build-push-action
+      uses: docker/build-push-action@v5
       with:
         context: .
+        #push: ${{ github.event_name != 'pull_request' }}
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
