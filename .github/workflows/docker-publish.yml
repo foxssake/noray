@@ -2,6 +2,7 @@ name: Docker Publish
 
 on:
   push:
+  pull_request:
 
 jobs:
 # From https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
