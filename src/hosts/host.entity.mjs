@@ -2,7 +2,8 @@
 import * as net from 'node:net'
 import * as dgram from 'node:dgram'
 /* eslint-enable */
-import { nanoid } from 'nanoid'
+import { nanoid, customAlphabet } from 'nanoid'
+import { config } from '../config.mjs'
 
 /**
 * Host entity.
@@ -47,7 +48,7 @@ export class HostEntity {
   constructor (options) {
     options && Object.assign(this, options)
 
-    this.oid ??= nanoid()
+    this.oid ??= customAlphabet(config.randomId.letters, config.randomId.length)()
     this.pid ??= nanoid(128)
   }
 }
