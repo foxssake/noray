@@ -2,7 +2,7 @@ name: Docker Publish
 
 on:
   push:
-    branches: [ "main" ]
+#    branches: [ "main" ]
 
 jobs:
 # From https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
