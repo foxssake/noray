@@ -47,8 +47,9 @@ export class HostEntity {
   */
   constructor (options) {
     options && Object.assign(this, options)
-
-    this.oid ??= nanoid.customAlphabet(config.oid.charset, config.oid.length)()
-    this.pid ??= nanoid.customAlphabet(config.pid.charset, config.pid.length)()
+    const customAlphabetOid = nanoid.customAlphabet(config.oid.charset, +config.oid.length)
+    const customAlphabetPid = nanoid.customAlphabet(config.pid.charset, +config.pid.length)
+    this.oid ??= customAlphabetOid(+config.oid.length)
+    this.pid ??= customAlphabetPid(+config.pid.length)
   }
 }
