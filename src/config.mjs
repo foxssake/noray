@@ -12,12 +12,12 @@ const env = process.env
 */
 export class NorayConfig {
   oid = {
-    length: env.NORAY_OID_LENGTH ?? 21,
+    length: integer(env.NORAY_OID_LENGTH) ?? 21,
     charset: env.NORAY_OID_CHARSET ?? urlAlphabet
   }
 
   pid = {
-    length: env.NORAY_PID_LENGTH ?? 128,
+    length: integer(env.NORAY_PID_LENGTH) ?? 128,
     charset: env.NORAY_PID_CHARSET ?? urlAlphabet
   }
 

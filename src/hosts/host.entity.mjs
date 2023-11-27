@@ -5,6 +5,9 @@ import * as dgram from 'node:dgram'
 import * as nanoid from 'nanoid'
 import { config } from '../config.mjs'
 
+const generateOID = nanoid.customAlphabet(config.oid.charset, config.oid.length)
+const generatePID = nanoid.customAlphabet(config.pid.charset, config.pid.length)
+
 /**
 * Host entity.
 *
@@ -47,9 +50,7 @@ export class HostEntity {
   */
   constructor (options) {
     options && Object.assign(this, options)
-    const customAlphabetOid = nanoid.customAlphabet(config.oid.charset, +config.oid.length)
-    const customAlphabetPid = nanoid.customAlphabet(config.pid.charset, +config.pid.length)
-    this.oid ??= customAlphabetOid(+config.oid.length)
-    this.pid ??= customAlphabetPid(+config.pid.length)
+    this.oid ??= generateOID(+config.oid.length)
+    this.pid ??= generatePID(+config.pid.length)
   }
 }
