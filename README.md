@@ -67,20 +67,20 @@ To run *noray*, use `pnpm start` or `pnpm start:prod` for production use.
 Upon startup, the application will allocate all the configured ports and start
 listening for incoming connections. Logs are written to `stdout`.
 
-## Usage with Docker
+### Usage with Docker
 
 Create `.env` file from `.env.example`.
 
 Build and run docker:
 
 ```
-docker build -t noray
-docker run --env-file=.env -t noray
+docker build . -t noray
+docker run -p 8090:8090 -p 8091:8091 --env-file=.env -t noray
 ```
 
-Or run prebuild docker:
+Or run prebuilt docker:
 ```
-docker run --env-file=.env -t ghcr.io/foxssake/noray:main
+docker run -p 8090:8090 -p 8091:8091 --env-file=.env -t ghcr.io/foxssake/noray:main
 ```
 
 ## Documentation
