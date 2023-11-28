@@ -50,7 +50,7 @@ export class HostEntity {
   */
   constructor (options) {
     options && Object.assign(this, options)
-    this.oid ??= generateOID(+config.oid.length)
-    this.pid ??= generatePID(+config.pid.length)
+    this.oid ??= generateOID()
+    this.pid ??= generatePID()
   }
 }
