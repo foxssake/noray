@@ -1,0 +1,7 @@
+.github
+test/
+.editorconfig
+.env.example
+.eslintrc.js
+.jsdoc.js
+node_modules/

@@ -67,6 +67,30 @@ To run *noray*, use `pnpm start` or `pnpm start:prod` for production use.
 Upon startup, the application will allocate all the configured ports and start
 listening for incoming connections. Logs are written to `stdout`.
 
+### Usage with Docker
+
+Create `.env` file from `.env.example`.
+
+Build and run docker:
+
+```
+docker build . -t noray
+docker run -p 8090:8090 -p 8091:8091 --env-file=.env -t noray
+```
+
+Or run prebuilt docker:
+```
+docker run -p 8090:8090 -p 8091:8091 --env-file=.env -t ghcr.io/foxssake/noray:main
+```
+
+#### EADDRNOTAVAIL
+
+If you get an `EADDRNOTAVAIL` error when trying to listen on an IPv6 address,
+you either need to [enable IPv6 in Docker], or choose an IPv4 host address to
+listen on, e.g. '0.0.0.0' or 'localhost'.
+
+[enable IPv6 in Docker]: https://docs.docker.com/config/daemon/ipv6/
+
 ## Documentation
 
 ### Protocol
