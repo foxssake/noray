@@ -1,8 +1,8 @@
 FROM node:18-alpine
 # From https://github.com/pnpm/pnpm/issues/4837
 
-EXPOSE 8890/tcp
-EXPOSE 8891/udp
+EXPOSE 8890/udp
+EXPOSE 8891/tcp
 
 COPY . noray
 
