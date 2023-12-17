@@ -1,7 +1,11 @@
 FROM node:18-alpine
 # From https://github.com/pnpm/pnpm/issues/4837
 
+# UDP host for remote address registration
+EXPOSE 8809/udp
+# TCP host for commands
 EXPOSE 8890/tcp
+# HTTP host for Prometheus metrics
 EXPOSE 8891/tcp
 
 COPY . noray
