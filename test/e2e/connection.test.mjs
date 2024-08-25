@@ -1,40 +1,52 @@
-import { describe, it, after, before } from 'node:test'
+import { describe, it, before, after } from 'node:test'
+import assert from 'node:assert'
 import { End2EndContext } from './context.mjs'
-import { config } from '../../src/config.mjs'
-import { requireSchema } from '../../src/validators/require.schema.mjs'
-import { sleep } from '../../src/utils.mjs'
 
-describe('Connections', { concurrency: false }, () => {
+describe('Connection', () => {
   const context = new End2EndContext()
 
   before(async () => {
-    config.games = 'test001 Test'
     await context.startup()
   })
 
-  it('should send connection diagnostics on join', { skip: true }, async () => {
-    // Given
-    context.log.info('Creating clients')
-    const host = context.connect()
-    const client = context.connect()
+  describe('connect', () => {
+    it('should respond with external address', async () => {
+      const host = await context.connect()
+      const client = await context.connect()
+      
+      // Grab data from responses
+      context.log.info('Registering parties')
+      const [oid, pid] = await context.registerHost(host)
+      const [_, clientPid] = await context.registerHost(client)
 
-    context.log.info('Logging in clients')
-    await host.session.login('host', 'test001')
-    await client.session.login('client', 'test001')
+      assert(oid, 'No oid received!')
+      assert(pid, 'No pid received!')
+      assert(clientPid, 'No client pid received!')
 
-    context.log.info('Creating lobby')
-    const lobby = await host.lobbies.create('test')
+      // Register external addresses
+      context.log.info('Registering external addresses')
+      await Promise.all([
+        context.registerExternal(undefined, pid),
+        context.registerExternal(undefined, clientPid)
+      ])
 
-    // When
-    context.log.info('Joining lobby with client')
-    await client.lobbies.join(lobby)
+      // Send connect request
+      client.write(`connect ${oid}\n`)
 
-    // Then
-    context.log.info('Waiting for incoming requests')
-    await sleep(config.connectionDiagnostics.timeout + 0.1)
-    ;(await host.peer.receive()).next(requireSchema('connection/handshake/request'))
-    ;(await client.peer.receive()).next(requireSchema('connection/handshake/request'))
+      // Assert responses
+      assert(
+        (await context.read(client)).find(cmd => cmd.startsWith('connect ')),
+        'No handshake received by client!'
+      )
+
+      assert(
+        (await context.read(host)).find(cmd => cmd.startsWith('connect ')),
+        'No handshake received by host!'
+      )
+    })
   })
 
-  after(() => context.shutdown())
+  after(() => {
+    context.shutdown()
+  })
 })

@@ -47,6 +47,33 @@ export function asSingletonFactory (f) {
 }
 
 /**
+* Memoize function.
+*
+* That is, for every set of input arguments, remember the result. The next time
+* the same arguments are used, instead of calculating the result again, it will
+* be recovered from cache.
+*
+* **NOTE** that the cache is not limited in any way, use only in cases where
+* the possible number of parameters is limited.
+*
+* @param {function(): T} f Function
+* @returns {function(): T} Memoized function
+* @template T
+*/
+export function memoize (f) {
+  const cache = new Map()
+  return function () {
+    const key = JSON.stringify(arguments)
+
+    if (!cache.has(key)) {
+      cache.set(key, f(...arguments))
+    }
+
+    return cache.get(key)
+  }
+}
+
+/**
 * Maps an input array into chunks of a given size. The last chunk might be
 * smaller than the requested size.
 *

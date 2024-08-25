@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert'
-import { byteSize, duration, enumerated, integer, number } from '../../src/config.parsers.mjs'
+import { byteSize, duration, enumerated, integer, number, ports } from '../../src/config.parsers.mjs'
 
 function Case(name, input, expected) {
   return { name, input, expected }
@@ -115,5 +115,21 @@ describe('duration', () => {
     it(kase.name, () => assert.throws(() =>
       duration(kase.input)
     ))
+  )
+})
+
+describe('ports', () => {
+  const cases = [
+    Case('should parse literal', '1024', [1024]),
+    Case('should parse absolute', '1024-1026', [1024, 1025, 1026]),
+    Case('should parse relative', '2048+3', [2048, 2049, 2050, 2051]),
+    Case('should parse single absolute', '1024-1024', [1024]),
+    Case('should parse single relative', '1024+0', [1024]),
+    Case('should return sorted', '2048+1, 1024-1025', [1024, 1025, 2048, 2049]),
+    Case('should return unique', '1-4, 2, 2-6', [1, 2, 3, 4, 5, 6])
+  ]
+
+  cases.forEach(kase =>
+    it(kase.name, () => assert.deepEqual(ports(kase.input), kase.expected))
   )
 })

@@ -1,21 +1,38 @@
 /* eslint-disable */
-import { SessionRepository } from '../sessions/session.repository.mjs'
-import { UDPRelayHandler } from './udp.relay.handler.mjs'
+import { HostRepository } from '../hosts/host.repository.mjs'
 /* eslint-enable */
 import dgram from 'node:dgram'
 import assert from 'node:assert'
-import { RelayEntry } from './relay.entry.mjs'
-import { NetAddress } from './net.address.mjs'
-import { requireParam } from '../assertions.mjs'
 import logger from '../logger.mjs'
+import { requireParam } from '../assertions.mjs'
+import * as prometheus from 'prom-client'
+import { metricsRegistry } from '../metrics/metrics.registry.mjs'
 
 const log = logger.child({ name: 'UDPRemoteRegistrar' })
+
+const registerSuccessCounter = new prometheus.Counter({
+  name: 'noray_remote_registrar_success',
+  help: 'Number of successful remote address registrations',
+  registers: [metricsRegistry]
+})
+
+const registerFailCounter = new prometheus.Counter({
+  name: 'noray_remote_registrar_fail',
+  help: 'Number of failed remote address registrations',
+  registers: [metricsRegistry]
+})
+
+const registerRepatCounter = new prometheus.Counter({
+  name: 'noray_remote_registrar_repeat',
+  help: 'Number of redundant remote address registrations',
+  registers: [metricsRegistry]
+})
 
 /**
 * @summary Class for remote address registration over UDP.
 *
 * @description The UDP remote registrar will listen on a specific port for
-* incoming session ID's. If the session ID is valid, it will create a new relay
+* incoming host ID's. If the host ID is valid, it will create a new relay
 * for that player and reply a packet saying 'OK'.
 *
 * Note that if the relay already exists, it will reply anyway, but will not
@@ -26,22 +43,17 @@ export class UDPRemoteRegistrar {
   /** @type {dgram.Socket} */
   #socket
 
-  /** @type {SessionRepository} */
-  #sessionRepository
-
-  /** @type {UDPRelayHandler} */
-  #udpRelayHandler
+  /** @type {HostRepository} */
+  #hostRepository
 
   /**
   * Construct instance.
   * @param {object} options Options
-  * @param {SessionRepository} options.sessionRepository Session repository
-  * @param {UDPRelayHandler} options.udpRelayHandler UDP relay handler
+  * @param {HostRepository} options.hostRepository Host repository
   * @param {dgram.Socket} [options.socket] Socket
   */
   constructor (options) {
-    this.#sessionRepository = requireParam(options.sessionRepository)
-    this.#udpRelayHandler = requireParam(options.udpRelayHandler)
+    this.#hostRepository = requireParam(options.hostRepository)
     this.#socket = options.socket ?? dgram.createSocket('udp4')
   }
 
@@ -79,18 +91,24 @@ export class UDPRemoteRegistrar {
   */
   async #handle (msg, rinfo) {
     try {
-      const sessionId = msg.toString('utf8')
-      log.debug({ sessionId, rinfo }, 'Received UDP relay request')
+      const pid = msg.toString('utf8')
+      log.debug({ pid, rinfo }, 'Received UDP relay request')
 
-      const session = this.#sessionRepository.find(sessionId)
-      assert(session, 'Unknown session id!')
+      const host = this.#hostRepository.findByPid(pid)
+      assert(host, 'Unknown host pid!')
 
-      await this.#udpRelayHandler.createRelay(new RelayEntry({
-        address: NetAddress.fromRinfo(rinfo)
-      }))
+      if (host.rinfo) {
+        // Host has already remote info registered
+        this.#socket.send('OK', rinfo.port, rinfo.address)
+        registerRepatCounter.inc()
+        return
+      }
 
+      host.rinfo = rinfo
       this.#socket.send('OK', rinfo.port, rinfo.address)
+      registerSuccessCounter.inc()
     } catch (e) {
+      registerFailCounter.inc()
       this.#socket.send(e.message ?? 'Error', rinfo.port, rinfo.address)
     }
   }

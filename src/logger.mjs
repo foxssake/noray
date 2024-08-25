@@ -9,11 +9,11 @@ export const loglevels = Object.freeze([
 dotenv.config()
 
 export function getLogLevel () {
-  return enumerated(process.env.NATTY_LOGLEVEL, loglevels) ?? 'info'
+  return enumerated(process.env.NORAY_LOGLEVEL, loglevels) ?? 'info'
 }
 
 const logger = pino({
-  name: 'natty',
+  name: 'noray',
   level: getLogLevel()
 })
 

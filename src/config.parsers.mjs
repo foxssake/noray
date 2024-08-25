@@ -23,6 +23,19 @@ export function number (value) {
 }
 
 /**
+  * Parse config value as enum.
+  *
+  * @param {any} value Value
+  * @param {Array} values Allowed values
+  * @returns {any?} Allowed value or undefined
+  */
+export function enumerated (value, values) {
+  return values.includes(value)
+    ? value
+    : undefined
+}
+
+/**
 * Split an input into nominator and unit
 * @param {string} value
 * @returns {number[]}
@@ -89,14 +102,49 @@ export function duration (value) {
 }
 
 /**
-  * Parse config value as enum.
-  *
-  * @param {any} value Value
-  * @param {Array} values Allowed values
-  * @returns {any?} Allowed value or undefined
-  */
-export function enumerated (value, values) {
-  return values.includes(value)
-    ? value
-    : undefined
+* Parse config value as port ranges.
+*
+* Three kinds of port ranges are parsed:
+* 1. literal - e.g. '1007' becomes [1007]
+* 1. absolute - e.g. '1024-1026' becomes [1024, 1025, 1026]
+* 1. relative - e.g. '1024+2' becomes [1024, 1025, 1026]
+*
+* These ranges are separated by a comma, e.g.:
+* `1007, 1024-1026, 2048+2`
+*
+* @param {string} value Value
+* @returns {number[]} Ports
+*/
+export function ports (value) {
+  if (value === undefined) {
+    return undefined
+  }
+
+  const ranges = value.split(',').map(r => r.trim())
+
+  const literals = ranges
+    .filter(p => /^\d+$/.test(p))
+    .map(integer)
+    .filter(p => !!p)
+    .map(p => [p, p])
+
+  const absolutes = ranges
+    .filter(r => r.includes('-'))
+    .map(r => r.split('-').map(integer))
+    .filter(r => !r.includes(undefined))
+
+  const relatives = ranges
+    .filter(r => r.includes('+'))
+    .map(r => r.split('+').map(integer))
+    .filter(r => !r.includes(undefined))
+    .map(([from, offset]) => [from, from + offset])
+
+  const result = [...literals, ...absolutes, ...relatives]
+    .flatMap(([from, to]) =>
+      [...new Array(to - from + 1)].map((_, i) => from + i)
+    )
+    .sort()
+    .filter((v, i, a) => i === 0 || v !== a[i - 1]) // ensure every port is unique
+
+  return result.length > 0 ? result : undefined
 }

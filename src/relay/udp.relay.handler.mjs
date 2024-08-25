@@ -6,8 +6,34 @@ import { UDPSocketPool } from './udp.socket.pool.mjs'
 import { time } from '../utils.mjs'
 import { EventEmitter } from 'node:events'
 import logger from '../logger.mjs'
+import * as prometheus from 'prom-client'
+import { metricsRegistry } from '../metrics/metrics.registry.mjs'
 
 const log = logger.child({ name: 'UDPRelayHandler' })
+
+const relayDurationHistogram = new prometheus.Histogram({
+  name: 'noray_relay_duration',
+  help: 'Time it takes to relay a packet',
+  registers: [metricsRegistry]
+})
+
+const relaySizeHistorgram = new prometheus.Histogram({
+  name: 'noray_relay_size',
+  help: 'Size of the packet being relayed',
+  registers: [metricsRegistry]
+})
+
+const relayDropCounter = new prometheus.Counter({
+  name: 'noray_relay_drop_count',
+  help: 'Number of relay packets dropped',
+  registers: [metricsRegistry]
+})
+
+const activeRelayGauge = new prometheus.Gauge({
+  name: 'noray_relay_count',
+  help: 'Count of currently active relays',
+  registers: [metricsRegistry]
+})
 
 /**
 * Class implementing the actual relay logic.
@@ -23,7 +49,7 @@ const log = logger.child({ name: 'UDPRelayHandler' })
 *
 * Example: Port 1 is allocated for Host, port 2 is allocated for Client. When
 * we get a packet targeting port 1 from Client, we use port 2 to relay the data
-* to Host. This way, Client will always appear as Natty:2 to the Host.
+* to Host. This way, Client will always appear as Noray:2 to the Host.
 */
 export class UDPRelayHandler extends EventEmitter {
   /** @type {UDPSocketPool} */
@@ -45,9 +71,11 @@ export class UDPRelayHandler extends EventEmitter {
 
   /**
   * Create a relay entry.
+  *
+  * If there's already a relay for the address, returns that.
+  * NOTE: This modifies the incoming relay and returns the same instance.
   * @param {RelayEntry} relay Relay
-  * @return {Promise<boolean>} True if the entry was created, false if it
-  * already exists
+  * @return {Promise<RelayEntry>} Resulting relay
   * @fires UDPRelayHandler#create
   */
   async createRelay (relay) {
@@ -55,25 +83,32 @@ export class UDPRelayHandler extends EventEmitter {
     if (this.hasRelay(relay)) {
       // We already have this relay entry
       log.trace({ relay }, 'Relay already exists, ignoring')
-      return false
+      return this.#relayTable.find(e => e.equals(relay))
     }
 
+    relay.port = this.#socketPool.getPort()
     this.emit('create', relay)
 
-    const socket = await this.#ensurePort(relay.port)
-    socket.on('message', (msg, rinfo) => {
-      this.relay(msg, NetAddress.fromRinfo(rinfo), relay.port)
-    })
+    const socket = this.#socketPool.getSocket(relay.port)
+    socket.removeAllListeners('message')
+      .on('message', (msg, rinfo) => {
+        this.relay(msg, NetAddress.fromRinfo(rinfo), relay.port)
+      })
+
     relay.lastReceived = time()
     relay.created = time()
     this.#relayTable.push(relay)
     log.trace({ relay }, 'Relay created')
 
-    return true
+    activeRelayGauge.inc()
+
+    return relay
   }
 
   /**
   * Check if relay already exists in the table.
+  *
+  * NOTE: This only compares the addresses, not the allocated port.
   * @param {RelayEntry} relay Relay
   * @returns {boolean} True if relay already exists
   */
@@ -95,16 +130,21 @@ export class UDPRelayHandler extends EventEmitter {
 
     this.emit('destroy', relay)
 
-    this.#socketPool.freePort(relay.port)
+    this.#socketPool.returnPort(relay.port)
     this.#relayTable = this.#relayTable.filter((_, i) => i !== idx)
+
+    activeRelayGauge.dec()
+
     return true
   }
 
   /**
-  * Free all relay entries, and by extension, sockets in the pool.
+  * Free all relay entries.
   */
   clear () {
     this.relayTable.forEach(entry => this.freeRelay(entry))
+
+    activeRelayGauge.reset()
   }
 
   /**
@@ -114,8 +154,11 @@ export class UDPRelayHandler extends EventEmitter {
   * @param {number} target Target port
   * @returns {Promise<boolean>} True on success
   * @fires UDPRelayHandler#transmit
+  * @fires UDPRelayHandler#drop
   */
   relay (msg, sender, target) {
+    const measure = relayDurationHistogram.startTimer()
+
     const senderRelay = this.#relayTable.find(r =>
       r.address.port === sender.port && r.address.address === sender.address
     )
@@ -123,6 +166,11 @@ export class UDPRelayHandler extends EventEmitter {
 
     if (!senderRelay || !targetRelay) {
       // We don't have a relay for the sender, target, or both
+      this.emit('drop', senderRelay, targetRelay, sender, target, msg)
+
+      relayDropCounter.inc()
+      measure()
+
       return false
     }
 
@@ -132,13 +180,16 @@ export class UDPRelayHandler extends EventEmitter {
       return false
     }
 
-    this.emit('transmit', senderRelay, targetRelay)
+    this.emit('transmit', senderRelay, targetRelay, msg)
 
     socket.send(msg, targetRelay.address.port, targetRelay.address.address)
 
     // Keep track of traffic timings
     senderRelay.lastReceived = time()
     targetRelay.lastSent = time()
+
+    relaySizeHistorgram.observe(msg?.byteLength ?? 0)
+    measure()
 
     return true
   }
@@ -157,14 +208,6 @@ export class UDPRelayHandler extends EventEmitter {
   */
   get relayTable () {
     return [...this.#relayTable]
-  }
-
-  async #ensurePort (port) {
-    if (!this.#socketPool.getSocket(port)) {
-      await this.#socketPool.allocatePort(port)
-    }
-
-    return this.#socketPool.getSocket(port)
   }
 }
 
@@ -195,4 +238,17 @@ export class UDPRelayHandler extends EventEmitter {
 * freed.
 * @event UDPRelayHandler#destroy
 * @param {RelayEntry} relay Relay being freed.
+*/
+
+/**
+* Relay drop event.
+*
+* This event is emitted when a packet arrives for relay that we can't transfer
+* - usually because of an unknown node ( either sender or target).
+* @event UDPRelayHandler#drop
+* @param {RelayEntry} sourceRelay Source relay
+* @param {RelayEntry} targetRelay Target relay
+* @param {NetAddress} sourceAddress Source address
+* @param {number} targetPort Target port
+* @param {Buffer} message Message
 */

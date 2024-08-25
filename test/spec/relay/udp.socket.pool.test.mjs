@@ -14,7 +14,7 @@ describe('UDPSocketPool', () => {
       const port = await pool.allocatePort()
 
       // Finally
-      pool.freePort(port)
+      pool.deallocatePort(port)
     })
   })
 
@@ -34,10 +34,11 @@ describe('UDPSocketPool', () => {
 
       // Then
       assert.deepEqual(pool.ports, [10001])
+      assert.equal(pool.getSocket(10001), socket)
     })
   })
 
-  describe('freePort', () => {
+  describe('deallocatePort', () => {
     it('should call close', () => {
       // Given
       const socket = sinon.createStubInstance(dgram.Socket)
@@ -51,7 +52,7 @@ describe('UDPSocketPool', () => {
       pool.addSocket(socket)
 
       // When
-      pool.freePort(7879)
+      pool.deallocatePort(7879)
 
       // Then
       assert(socket.close.calledOnce)
@@ -71,10 +72,63 @@ describe('UDPSocketPool', () => {
       pool.addSocket(socket)
 
       // When
-      pool.freePort(7876)
+      pool.deallocatePort(7876)
 
       // Then
       assert(socket.close.notCalled)
+    })
+  })
+
+  describe ('getPort', () => {
+    it('should return allocated', async () => {
+      // Given
+      const pool = new UDPSocketPool()
+      const expected = await pool.allocatePort()
+
+      // When
+      const actual = pool.getPort()
+
+      // Then
+      assert(!pool.hasFreePort())
+      assert.equal(actual, expected)
+
+      // Finally
+      pool.deallocatePort(expected)
+    })
+
+    it('should throw if none available', () => {
+      // Given
+      const pool = new UDPSocketPool()
+
+      // When + Then
+      assert(!pool.hasFreePort())
+      assert.throws(() => pool.getPort())
+    })
+  })
+
+  describe('returnPort', () => {
+    it('should make port available', async () => {
+      // Given
+      const pool = new UDPSocketPool()
+      await pool.allocatePort()
+      const port = pool.getPort()
+
+      // When
+      pool.returnPort(port)
+
+      // Then
+      assert(pool.hasFreePort())
+
+      // Finally
+      pool.deallocatePort(port)
+    })
+
+    it('should ignore unknown', async () => {
+      // Given
+      const pool = new UDPSocketPool()
+
+      // When + then
+      assert.doesNotThrow(() => pool.returnPort(65575))
     })
   })
 })
