@@ -59,7 +59,8 @@ export class ProtocolServer extends events.EventEmitter {
     rl.on('line', line => this.#handleLine(socket, line))
     rl.on('error', err => {
       this.detach(socket)
-      log.error("Socket connection abruptly lost!")
+      log.error('Socket connection abruptly lost!')
+      log.error(err)
     })
     this.#readers.set(socket, rl)
 

@@ -36,7 +36,9 @@ export function handleRegisterHost (hostRepository) {
         socket.remoteAddress, socket.remotePort
       )
 
-      socket.on('error', err => {})
+      socket.on('error', err => {
+        log.error(err)
+      })
 
       socket.on('close', () => {
         log.info(
