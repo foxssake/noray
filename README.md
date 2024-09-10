@@ -69,21 +69,40 @@ listening for incoming connections. Logs are written to `stdout`.
 
 ### Usage with Docker
 
-Create `.env` file from `.env.example`.
+Create `.env` file based on `.env.example`.
 
 Build and run docker:
 
 ```
 docker build . -t noray
-docker run -p 8890:8890 -p 8891:8891/udp -p 8091:8091 --env-file=.env -t noray
+docker run -p 8890:8890 -p 8891:8891 -p 8809:8809/udp -p 49152-51200:49152-51200/udp --env-file=.env -t noray
 ```
 
 Or run prebuilt docker:
 ```
-docker run -p 8890:8890 -p 8891:8891/udp -p 8891:8891 --env-file=.env -t ghcr.io/foxssake/noray:main
+docker run -p 8890:8890 -p 8891:8891 -p 8809:8809/udp -p 49152-51200:49152-51200/udp --env-file=.env -t ghcr.io/foxssake/noray:main
 ```
 
-_Please Note: This configuration will only allow NAT punchthrough but no relaying. Make sure to add `-p 49152-51200:49152-51200/udp` to allow all default udp relay ports. Beware! This will increase the deploy time severely!_
+The above will expose the following ports:
+
+* Port 8890 for clients to register and request connections
+* Port 8891 to expose metrics over HTTP
+* Port 8809 for the remote port registrar
+* Ports 49152 to 51200 for relays
+  * Make sure these are the same ports as configured in `.env`!
+
+Note that exposing a lot of relay ports can severely impact deploy time.
+
+In case of relays not working - i.e. clients can register and request
+connections, but the handshake process fails -, Docker might be mapping ports
+as data arrives from outside of the container. In these cases, try running
+noray using the [host network]:
+
+```
+docker run --network host --env-file=.env -t noray
+```
+
+[host network]: https://docs.docker.com/engine/network/tutorials/host/
 
 #### EADDRNOTAVAIL
 

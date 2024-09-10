@@ -22,12 +22,12 @@ export class NorayConfig {
   }
 
   socket = {
-    host: env.NORAY_SOCKET_HOST ?? '::1',
+    host: env.NORAY_SOCKET_HOST ?? '0.0.0.0',
     port: integer(env.NORAY_SOCKET_PORT) ?? 8890
   }
 
   http = {
-    host: env.NORAY_HTTP_HOST ?? '::1',
+    host: env.NORAY_HTTP_HOST ?? '0.0.0.0',
     port: integer(env.NORAY_HTTP_PORT) ?? 8891
   }
 
