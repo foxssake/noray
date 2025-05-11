@@ -104,7 +104,7 @@ export class ProtocolServer extends events.EventEmitter {
       : `${command}\n`,
       err => {
         if (err) {
-          log.error(err, 'Failed sending command "%s"(%s)', command, data)
+          log.error({ err }, 'Failed sending command "%s"(%s)', command, data)
         }
       }
     )
