@@ -61,13 +61,17 @@ export class Noray extends EventEmitter {
       )
 
       socket.on('error', err => {
+        this.#log.error('Listen socket encountered an error!')
         this.#log.error(err)
       })
 
       socket.on('connection', conn => {
         this.#protocolServer.attach(conn)
         conn.on('close', () => this.#protocolServer.detach(conn))
-        conn.on('error', err => this.#log.error(err))
+        conn.on('error', err => {
+          this.#log.error('Connection socket encountered an error!')
+          this.#log.error(err)
+        })
       })
 
       this.emit('listening', config.socket.port, config.socket.host)
