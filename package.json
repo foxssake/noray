@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "dotenv": "^16.0.3",
+    "longjohn": "^0.2.12",
     "nanoid": "^4.0.1",
     "pino": "^8.11.0",
     "prom-client": "^14.2.0"

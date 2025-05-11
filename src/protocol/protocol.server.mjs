@@ -101,7 +101,12 @@ export class ProtocolServer extends events.EventEmitter {
 
     socket.write(data
       ? `${command} ${data.toString()}\n`
-      : `${command}\n`
+      : `${command}\n`,
+      err => {
+        if (err) {
+          log.error(err, 'Failed sending command "%s"(%s)', command, data)
+        }
+      }
     )
   }
 

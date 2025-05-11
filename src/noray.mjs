@@ -4,6 +4,8 @@ import logger from './logger.mjs'
 import { config } from './config.mjs'
 import { ProtocolServer } from './protocol/protocol.server.mjs'
 
+import * as longjohn from 'longjohn'
+
 const defaultModules = [
   'metrics/metrics.mjs',
   'relay/relay.mjs',
