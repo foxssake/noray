@@ -4,6 +4,7 @@ import logger from './logger.mjs'
 import { config } from './config.mjs'
 import { ProtocolServer } from './protocol/protocol.server.mjs'
 
+// eslint-disable-next-line no-unused-vars
 import * as longjohn from 'longjohn'
 
 const defaultModules = [
