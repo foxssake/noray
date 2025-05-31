@@ -59,7 +59,7 @@ export class DynamicRelaying {
       'Creating dynamic relay'
     )
     this.#buffers.set(key, [message])
-    const port = await relayHandler.socketPool.allocatePort()
+    const port = relayHandler.socketPool.getPort()
     const relay = new RelayEntry({
       address: senderAddress,
       port
@@ -71,7 +71,7 @@ export class DynamicRelaying {
       'Relay created, sending %d packets',
       this.#buffers.get(key)?.length ?? 0
     )
-    this.#buffers.get(key).forEach(msg =>
+    this.#buffers.get(key)?.forEach(msg =>
       relayHandler.relay(msg, senderAddress, targetPort)
     )
 

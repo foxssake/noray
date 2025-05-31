@@ -18,7 +18,7 @@ describe('DynamicRelaying', () => {
   it('should create relay', async () => {
     // Given
     const socketPool = sinon.createStubInstance(UDPSocketPool)
-    socketPool.allocatePort.resolves(10000)
+    socketPool.getPort.returns(10000)
 
     const relayHandler = sinon.createStubInstance(UDPRelayHandler)
     relayHandler.on.callThrough()
