@@ -1,0 +1,4 @@
+overrides:
+  '@foxssake/trimsock-js': link:../../../../../home/adminus/.local/share/pnpm/global/5/node_modules/@foxssake/trimsock-js
+  '@foxssake/trimsock-node': link:../../../../../home/adminus/.local/share/pnpm/global/5/node_modules/@foxssake/trimsock-node
+  trimsock-node: link:../../../../../home/adminus/.local/share/pnpm/global/5/node_modules/@foxssake/trimsock-node

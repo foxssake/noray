@@ -3,6 +3,7 @@ import { EventEmitter } from 'node:events'
 import logger from './logger.mjs'
 import { config } from './config.mjs'
 import { ProtocolServer } from './protocol/protocol.server.mjs'
+import { NodeSocketReactor } from '@foxssake/trimsock-node'
 
 const defaultModules = [
   'metrics/metrics.mjs',
@@ -16,10 +17,13 @@ const hooks = []
 
 export class Noray extends EventEmitter {
   /** @type {net.Server} */
-  #socket
+  #server
 
   /** @type {ProtocolServer} */
   #protocolServer
+
+  /** @type {NodeSocketReactor} */
+  #reactor
 
   #log = logger
 
@@ -36,10 +40,8 @@ export class Noray extends EventEmitter {
 
     this.#log.info('Starting Noray')
 
-    const socket = net.createServer()
-
-    this.#socket = socket
     this.#protocolServer = new ProtocolServer()
+    this.#reactor = new NodeSocketReactor()
 
     // Import modules for hooks
     for (const m of modules) {
@@ -52,25 +54,13 @@ export class Noray extends EventEmitter {
     hooks.forEach(h => h(this))
     this.#log.info('Hooks done')
 
-    socket.listen(config.socket.port, config.socket.host, () => {
+    // Start server
+    this.#log.info('Starting TCP server')
+    this.#server = this.#reactor.serve().listen(config.socket.port, config.socket.host, () => {
       this.#log.info(
         'Listening on %s:%s',
         config.socket.host, config.socket.port
       )
-
-      socket.on('error', err => {
-        this.#log.error('Listen socket encountered an error!')
-        this.#log.error(err)
-      })
-
-      socket.on('connection', conn => {
-        this.#protocolServer.attach(conn)
-        conn.on('close', () => this.#protocolServer.detach(conn))
-        conn.on('error', err => {
-          this.#log.error('Connection socket encountered an error!')
-          this.#log.error(err)
-        })
-      })
 
       this.emit('listening', config.socket.port, config.socket.host)
     })
@@ -80,7 +70,7 @@ export class Noray extends EventEmitter {
     this.#log.info('Shutting down')
 
     this.emit('close')
-    this.#socket.close()
+    this.#server.close()
   }
 
   get protocolServer () {
