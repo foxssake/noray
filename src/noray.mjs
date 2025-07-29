@@ -42,6 +42,9 @@ export class Noray extends EventEmitter {
 
     this.#protocolServer = new ProtocolServer()
     this.#reactor = new NodeSocketReactor()
+      .onError((command, exchange, error) => {
+        exchange.failOrSend({ name: command.name, data: '' + error })
+      })
 
     // Import modules for hooks
     for (const m of modules) {
