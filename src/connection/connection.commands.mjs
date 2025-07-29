@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { ProtocolServer } from '../protocol/protocol.server.mjs'
 import { HostRepository } from '../hosts/host.repository.mjs'
+import { NodeSocketReactor } from '@foxssake/trimsock-node'
 /* eslint-enable */
 import assert from 'node:assert'
 import logger from '../logger.mjs'
@@ -13,19 +14,22 @@ import { NetAddress } from '../relay/net.address.mjs'
 */
 export function handleConnect (hostRepository) {
   /**
-  * @param {ProtocolServer} server
+  * @param {NodeSocketReactor} server
   */
   return function (server) {
-    server.on('connect', (data, socket) => {
+    server.on('connect', (command, exchange) => {
       const log = logger.child({ name: 'cmd:connect' })
 
-      const oid = data
+      const socket = exchange.source
+      const oid = command.requireText()
       const host = hostRepository.find(oid)
       const client = hostRepository.findBySocket(socket)
+
       log.debug(
         { oid, client: socket.address() },
         'Client attempting to connect to host'
       )
+
       assert(host, 'Unknown host oid: ' + oid)
       assert(host.rinfo, 'Host has no remote info registered!')
       assert(client, 'Unknown client from address')
@@ -33,8 +37,10 @@ export function handleConnect (hostRepository) {
 
       const hostAddress = stringifyAddress(host.rinfo)
       const clientAddress = stringifyAddress(client.rinfo)
-      server.send(socket, 'connect', hostAddress)
-      server.send(host.socket, 'connect', clientAddress)
+
+      server.send(socket, { name: 'connect', data: hostAddress })
+      server.send(host.socket, { name: 'connect', data: clientAddress })
+
       log.debug(
         { client: clientAddress, host: hostAddress, oid },
         'Connected client to host'
@@ -48,15 +54,17 @@ export function handleConnect (hostRepository) {
 */
 export function handleConnectRelay (hostRepository) {
   /**
-  * @param {ProtocolServer} server
+  * @param {NodeSocketReactor} server
   */
   return function (server) {
-    server.on('connect-relay', async (data, socket) => {
+    server.on('connect-relay', async (command, exchange) => {
       const log = logger.child({ name: 'cmd:connect-relay' })
 
-      const oid = data
+      const socket = exchange.source
+      const oid = command.requireText()
       const host = hostRepository.find(oid)
       const client = hostRepository.findBySocket(socket)
+
       log.debug(
         { oid, client: `${socket.remoteAddress}:${socket.remotePort}` },
         'Client attempting to connect to host'
@@ -69,8 +77,8 @@ export function handleConnectRelay (hostRepository) {
       client.relay = await getRelay(client.rinfo)
 
       log.debug({ host: host.relay, client: client.relay }, 'Replying with relay')
-      server.send(socket, 'connect-relay', host.relay)
-      server.send(host.socket, 'connect-relay', client.relay)
+      server.send(socket, { name: 'connect-relay', data: host.relay })
+      server.send(host.socket, { name: 'connect-relay', data: client.relay })
       log.debug(
         { client: `${socket.remoteAddress}:${socket.remotePort}`, relay: host.relay, oid },
         'Connected client to host'

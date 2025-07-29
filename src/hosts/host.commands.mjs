@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { HostRepository } from './host.repository.mjs'
+import { NodeSocketReactor } from '@foxssake/trimsock-node'
 /* eslint-enable */
 import { HostEntity } from './host.entity.mjs'
 import logger from '../logger.mjs'
@@ -17,18 +18,19 @@ const activeHostsGauge = new prometheus.Gauge({
 */
 export function handleRegisterHost (hostRepository) {
   /**
-  * @param {ProtocolServer} server
+  * @param {NodeSocketReactor} server
   */
   return function (server) {
-    server.on('register-host', (_data, socket) => {
+    server.on('register-host', (__, exchange) => {
       const log = logger.child({ name: 'cmd:register-host' })
       activeHostsGauge.inc()
 
+      const socket = exchange.source
       const host = new HostEntity({ socket })
       hostRepository.add(host)
 
-      server.send(socket, 'set-oid', host.oid)
-      server.send(socket, 'set-pid', host.pid)
+      exchange.send({ name: 'set-oid', data: host.oid })
+      exchange.send({ name: 'set-pid', data: host.pid })
 
       log.info(
         { oid: host.oid, pid: host.pid },

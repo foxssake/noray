@@ -76,4 +76,8 @@ export class Noray extends EventEmitter {
   get protocolServer () {
     return this.#protocolServer
   }
+
+  get reactor () {
+    return this.#reactor
+  }
 }
