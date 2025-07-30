@@ -2,13 +2,11 @@ import * as net from 'node:net'
 import { EventEmitter } from 'node:events'
 import logger from './logger.mjs'
 import { config } from './config.mjs'
-import { ProtocolServer } from './protocol/protocol.server.mjs'
 import { NodeSocketReactor } from '@foxssake/trimsock-node'
 
 const defaultModules = [
   'metrics/metrics.mjs',
   'relay/relay.mjs',
-  'echo/echo.mjs',
   'hosts/host.mjs',
   'connection/connection.mjs'
 ]
@@ -18,9 +16,6 @@ const hooks = []
 export class Noray extends EventEmitter {
   /** @type {net.Server} */
   #server
-
-  /** @type {ProtocolServer} */
-  #protocolServer
 
   /** @type {NodeSocketReactor} */
   #reactor
@@ -40,7 +35,6 @@ export class Noray extends EventEmitter {
 
     this.#log.info('Starting Noray')
 
-    this.#protocolServer = new ProtocolServer()
     this.#reactor = new NodeSocketReactor()
       .onError((command, exchange, error) => {
         exchange.failOrSend({ name: command.name, data: '' + error })
@@ -74,10 +68,6 @@ export class Noray extends EventEmitter {
 
     this.emit('close')
     this.#server.close()
-  }
-
-  get protocolServer () {
-    return this.#protocolServer
   }
 
   get reactor () {
