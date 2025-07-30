@@ -1,4 +1,6 @@
+/* eslint-disable */
 import * as net from 'node:net'
+/* eslint-enable */
 import { EventEmitter } from 'node:events'
 import logger from './logger.mjs'
 import { config } from './config.mjs'
