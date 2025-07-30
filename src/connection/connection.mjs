@@ -8,7 +8,7 @@ const log = logger.child({ name: 'mod:connection' })
 Noray.hook(noray => {
   log.info('Registering connection commands')
 
-  // TODO: Add `.configure()` to trimsock reactor?
-  handleConnect(hostRepository)(noray.reactor)
-  handleConnectRelay(hostRepository)(noray.reactor)
+  noray.reactor
+    .configure(handleConnect(hostRepository))
+    .configure(handleConnectRelay(hostRepository))
 })

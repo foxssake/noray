@@ -1,5 +1,4 @@
 /* eslint-disable */
-import { ProtocolServer } from '../protocol/protocol.server.mjs'
 import { HostRepository } from '../hosts/host.repository.mjs'
 import { NodeSocketReactor } from '@foxssake/trimsock-node'
 /* eslint-enable */

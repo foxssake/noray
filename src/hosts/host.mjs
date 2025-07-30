@@ -10,5 +10,6 @@ export const hostRepository = new HostRepository()
 Noray.hook(noray => {
   log.info('Registering host commands')
 
-  handleRegisterHost(hostRepository)(noray.reactor)
+  noray.reactor
+    .configure(handleRegisterHost(hostRepository))
 })
