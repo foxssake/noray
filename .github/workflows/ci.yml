@@ -47,6 +47,6 @@ jobs:
     - name: Setup
       uses: ./.github/actions/setup.node
     - name: Environment
-      run: print $CI && env
+      run: echo $CI && env
     - name: End to end tests
       run: pnpm test:e2e
