@@ -4,6 +4,7 @@ import { describe, it, before, after } from 'node:test'
 import assert, { fail } from 'node:assert'
 import { End2EndContext } from './context.mjs'
 import { promiseEvent, sleep } from '../../src/utils.mjs'
+import { isCI } from './is.ci'
 
 describe('Connection', () => {
   const context = new End2EndContext()
@@ -89,7 +90,7 @@ describe('Connection', () => {
     context.log.info('Client received relay port %d', client.targetRelay)
   })
 
-  it('should relay data', { skip: (process.env.CI ? "Skipping in CI until #50 is fixed" : undefined)}, async () => {
+  it('should relay data', { skip: (isCI() ? "Skipping in CI until #50 is fixed" : undefined)}, async () => {
     // Since it's all running on localhost, let's assume the data gets through
     const message = 'Hello from client!'
     const response = 'Hello from host!'
