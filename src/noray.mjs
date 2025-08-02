@@ -50,8 +50,8 @@ export class Noray extends EventEmitter {
 
     // Run hooks
     this.#log.info('Running %d hooks', hooks.length)
-    hooks.forEach(h => h(this))
-    this.#log.info('Hooks done')
+    const hookPromises = hooks.map(h => h(this))
+    this.#log.info('Hooks launched')
 
     // Start server
     this.#log.info('Starting TCP server')
@@ -75,6 +75,10 @@ export class Noray extends EventEmitter {
 
       this.emit('listening', config.socket.port, config.socket.host)
     })
+
+    this.#log.info('Waiting for hooks to finish')
+    await Promise.all(hookPromises)
+    this.#log.info('Started noray in %f ms', process.uptime() * 1000.0)
   }
 
   shutdown () {
