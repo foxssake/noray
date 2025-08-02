@@ -76,8 +76,8 @@ export function handleConnectRelay (hostRepository) {
       client.relay = await getRelay(client.rinfo)
 
       log.debug({ host: host.relay, client: client.relay }, 'Replying with relay')
-      server.send(socket, { name: 'connect-relay', data: host.relay })
-      server.send(host.socket, { name: 'connect-relay', data: client.relay })
+      server.send(socket, { name: 'connect-relay', data: host.relay.toString() })
+      server.send(host.socket, { name: 'connect-relay', data: client.relay.toString() })
       log.debug(
         { client: `${socket.remoteAddress}:${socket.remotePort}`, relay: host.relay, oid },
         'Connected client to host'
