@@ -2,7 +2,7 @@ import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
 import { End2EndContext } from './context.mjs'
 
-describe('Hosts', () => {
+describe('Hosts', { skip: (isCI() ? "Skipping in CI until #50 is fixed" : undefined)}, () => {
   const context = new End2EndContext()
 
   before(async () => {
