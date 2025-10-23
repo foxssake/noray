@@ -78,7 +78,7 @@ export class UDPRelayHandler extends EventEmitter {
   * @return {Promise<RelayEntry>} Resulting relay
   * @fires UDPRelayHandler#create
   */
-  async createRelay (relay) {
+  createRelay (relay) {
     log.debug({ relay }, 'Creating relay')
     if (this.hasRelay(relay)) {
       // We already have this relay entry
