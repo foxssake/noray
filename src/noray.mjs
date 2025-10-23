@@ -9,7 +9,7 @@ import { promiseEvent } from './utils.mjs'
 
 const defaultModules = [
   'metrics/metrics.mjs',
-  // 'relay/relay.mjs'
+  'relay/relay.mjs',
   'hosts/host.mjs',
   'connection/connection.mjs'
 ]
