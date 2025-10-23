@@ -36,7 +36,7 @@ Noray.hook(async noray => {
   log.info('Binding %d ports for relaying', config.udpRelay.ports.length)
 
   for (const port of config.udpRelay.ports) {
-    log.debug('Binding port %d for relay', port)
+    log.trace('Binding port %d for relay', port)
     try {
       await udpSocketPool.allocatePort(port)
     } catch (err) {

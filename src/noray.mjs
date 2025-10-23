@@ -5,6 +5,7 @@ import { EventEmitter } from 'node:events'
 import logger from './logger.mjs'
 import { config } from './config.mjs'
 import { NodeSocketReactor } from '@foxssake/trimsock-node'
+import { promiseEvent } from './utils.mjs'
 
 const defaultModules = [
   'metrics/metrics.mjs',
@@ -53,9 +54,14 @@ export class Noray extends EventEmitter {
     const hookPromises = hooks.map(h => h(this))
     this.#log.info('Hooks launched')
 
+    this.#log.info('Waiting for hooks to finish')
+    await Promise.all(hookPromises)
+
     // Start server
     this.#log.info('Starting TCP server')
-    this.#server = this.#reactor.serve().listen(config.socket.port, config.socket.host, () => {
+    this.#server = this.#reactor.serve()
+    this.#server.listen(config.socket.port, config.socket.host)
+    this.#server.on('listening', () => {
       this.#log.info(
         'Listening on %s:%s',
         config.socket.host, config.socket.port
@@ -76,8 +82,7 @@ export class Noray extends EventEmitter {
       this.emit('listening', config.socket.port, config.socket.host)
     })
 
-    this.#log.info('Waiting for hooks to finish')
-    await Promise.all(hookPromises)
+    await promiseEvent(this, 'listening')
     this.#log.info('Started noray in %f ms', process.uptime() * 1000.0)
   }
 

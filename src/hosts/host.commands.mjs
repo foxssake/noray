@@ -29,8 +29,8 @@ export function handleRegisterHost (hostRepository) {
       const host = new HostEntity({ socket })
       hostRepository.add(host)
 
-      exchange.send({ name: 'set-oid', data: host.oid })
-      exchange.send({ name: 'set-pid', data: host.pid })
+      exchange.send({ name: 'set-oid', params: [host.oid] })
+      exchange.send({ name: 'set-pid', params: [host.pid] })
 
       log.info(
         { oid: host.oid, pid: host.pid },

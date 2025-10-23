@@ -37,8 +37,8 @@ export function handleConnect (hostRepository) {
       const hostAddress = stringifyAddress(host.rinfo)
       const clientAddress = stringifyAddress(client.rinfo)
 
-      server.send(socket, { name: 'connect', data: hostAddress })
-      server.send(host.socket, { name: 'connect', data: clientAddress })
+      server.send(socket, { name: 'connect', params: [hostAddress] })
+      server.send(host.socket, { name: 'connect', params: [clientAddress] })
 
       log.debug(
         { client: clientAddress, host: hostAddress, oid },
@@ -76,8 +76,8 @@ export function handleConnectRelay (hostRepository) {
       client.relay = await getRelay(client.rinfo)
 
       log.debug({ host: host.relay, client: client.relay }, 'Replying with relay')
-      server.send(socket, { name: 'connect-relay', data: host.relay.toString() })
-      server.send(host.socket, { name: 'connect-relay', data: client.relay.toString() })
+      server.send(socket, { name: 'connect-relay', params: [host.relay.toString()] })
+      server.send(host.socket, { name: 'connect-relay', params: [client.relay.toString()] })
       log.debug(
         { client: `${socket.remoteAddress}:${socket.remotePort}`, relay: host.relay, oid },
         'Connected client to host'

@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@foxssake/trimsock-js':
-        specifier: ^0.13.3
-        version: 0.13.3(typescript@5.9.2)
+        specifier: ^0.17.0
+        version: 0.17.0(typescript@5.9.2)
       '@foxssake/trimsock-node':
-        specifier: ^0.13.3
-        version: 0.13.3(typescript@5.9.2)
+        specifier: ^0.17.0
+        version: 0.17.0(typescript@5.9.2)
       dotenv:
         specifier: ^16.0.3
         version: 16.5.0
@@ -92,13 +92,13 @@ packages:
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  '@foxssake/trimsock-js@0.13.3':
-    resolution: {integrity: sha512-mmHoaoDl2BgRPLwKY/UORjslK8SxSpLjMSEY/H/8VsouQkAvFhqPbOc0Ej+054TsLAkf5y/j2G0511xHGyyHiQ==}
+  '@foxssake/trimsock-js@0.17.0':
+    resolution: {integrity: sha512-s81agKjOeUOZ/E+3SdjIntEnc7r879QbREBsVPmDvHuw2tDUdq7SsWJomNjwdFpt8Vlqj7WVTQ+pioo2T5De2A==}
     peerDependencies:
       typescript: ^5.0.0
 
-  '@foxssake/trimsock-node@0.13.3':
-    resolution: {integrity: sha512-vldw0ZEL/X0FW7oDLa3G1cXGSKCuif/wgIthMh54jumJj/jz8RkR4L73LvYRZnnY7dyJyUI1nk9id9pbDpw4Tg==}
+  '@foxssake/trimsock-node@0.17.0':
+    resolution: {integrity: sha512-28SDnnfICDCYD8ROA4PtwGwa1gc8piBxbXwl7qqOFqUwpGYpHMgMWzeYVCs1nQ4oMT66UQ4QpJMPrsSMOQTl0Q==}
     engines: {node: '>=18.16.0'}
     peerDependencies:
       typescript: ^5.0.0
@@ -1302,13 +1302,13 @@ snapshots:
 
   '@eslint/js@8.57.1': {}
 
-  '@foxssake/trimsock-js@0.13.3(typescript@5.9.2)':
+  '@foxssake/trimsock-js@0.17.0(typescript@5.9.2)':
     dependencies:
       typescript: 5.9.2
 
-  '@foxssake/trimsock-node@0.13.3(typescript@5.9.2)':
+  '@foxssake/trimsock-node@0.17.0(typescript@5.9.2)':
     dependencies:
-      '@foxssake/trimsock-js': 0.13.3(typescript@5.9.2)
+      '@foxssake/trimsock-js': 0.17.0(typescript@5.9.2)
       typescript: 5.9.2
 
   '@humanwhocodes/config-array@0.13.0':

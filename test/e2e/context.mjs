@@ -21,9 +21,6 @@ export class End2EndContext {
     this.noray = new Noray()
     await this.noray.start()
 
-    this.log.info('Waiting for Noray ot start listening')
-    await promiseEvent(this.noray, 'listening')
-
     this.log.info('Startup done, ready for testing')
   }
 
@@ -47,7 +44,9 @@ export class End2EndContext {
       lines.push(line)
     }
 
-    return lines.join('').split('\n')
+    const result = lines.join('').split('\n')
+    this.log.debug({ result }, "Read data from noray")
+    return result
   }
 
   /**

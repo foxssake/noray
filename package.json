@@ -40,8 +40,8 @@
     "utap": "^0.2.0"
   },
   "dependencies": {
-    "@foxssake/trimsock-js": "^0.13.3",
-    "@foxssake/trimsock-node": "^0.13.3",
+    "@foxssake/trimsock-js": "^0.17.0",
+    "@foxssake/trimsock-node": "^0.17.0",
     "dotenv": "^16.0.3",
     "nanoid": "^4.0.1",
     "pino": "^8.11.0",

@@ -4,9 +4,8 @@ import { describe, it, before, after } from 'node:test'
 import assert, { fail } from 'node:assert'
 import { End2EndContext } from './context.mjs'
 import { promiseEvent, sleep } from '../../src/utils.mjs'
-import { isCI } from './is.ci'
 
-describe('Connection', { skip: (isCI() ? "Skipping in CI until #50 is fixed" : undefined)}, () => {
+describe('Connection', () => {
   const context = new End2EndContext()
 
   const host = {
