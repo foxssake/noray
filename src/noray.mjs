@@ -8,7 +8,7 @@ import { NodeSocketReactor } from '@foxssake/trimsock-node'
 import { promiseEvent } from './utils.mjs'
 
 const defaultModules = [
-  'metrics/metrics.mjs',
+  'metrics/metrics.mjs'
   // 'relay/relay.mjs',
   // 'hosts/host.mjs',
   // 'connection/connection.mjs'
