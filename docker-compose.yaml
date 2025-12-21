@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  noray:
+    image: ghcr.io/foxssake/noray:main
+    container_name: noray-server
+    restart: unless-stopped
+    ports:
+      - "8890:8890"     # TCP port for client connections
+      - "8891:8891"     # HTTP port for metrics
+      - "8809:8809/udp" # UDP port for remote registration
+      - "49152-51200:49152-51200/udp" # UDP relay ports
+    env_file:
+      - .env

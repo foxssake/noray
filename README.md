@@ -82,6 +82,11 @@ Or run prebuilt docker:
 ```
 docker run -p 8890:8890 -p 8891:8891 -p 8809:8809/udp -p 49152-51200:49152-51200/udp --env-file=.env -t ghcr.io/foxssake/noray:main
 ```
+Or use the docker compose yaml provided
+
+```
+docker-compose up -d
+```
 
 The above will expose the following ports:
 
