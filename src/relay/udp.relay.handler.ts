@@ -59,10 +59,16 @@ export class UDPRelayHandler extends EventEmitter {
    */
   public readonly socketPool: UDPSocketPool;
 
+  private _relayTable: RelayEntry[] = [];
+
   /**
    * Relay table used for relaying.
    */
-  public readonly relayTable: RelayEntry[] = [];
+  public get relayTable(): RelayEntry[] {
+    // HACK: Let's hope nobody modifies this; kinda don't want to copy it on
+    // every return
+    return this._relayTable;
+  }
 
   constructor(options: UDPRelayHandlerOptions) {
     super();
@@ -83,7 +89,7 @@ export class UDPRelayHandler extends EventEmitter {
     if (this.hasRelay(relay)) {
       // We already have this relay entry
       log.trace({ relay }, "Relay already exists, ignoring");
-      return this.relayTable.find((e) => e.equals(relay))!!;
+      return this._relayTable.find((e) => e.equals(relay))!!;
     }
 
     relay.port = this.socketPool.getPort();
@@ -96,7 +102,7 @@ export class UDPRelayHandler extends EventEmitter {
 
     relay.lastReceived = time();
     relay.created = time();
-    this.relayTable.push(relay);
+    this._relayTable.push(relay);
     log.trace({ relay }, "Relay created");
 
     activeRelayGauge.inc();
@@ -110,7 +116,7 @@ export class UDPRelayHandler extends EventEmitter {
    * NOTE: This only compares the addresses, not the allocated port.
    */
   hasRelay(relay: RelayEntry): boolean {
-    return this.relayTable.find((e) => e.equals(relay)) !== undefined;
+    return this._relayTable.find((e) => e.equals(relay)) !== undefined;
   }
 
   /**
@@ -118,7 +124,7 @@ export class UDPRelayHandler extends EventEmitter {
    * @fires UDPRelayHandler#destroy
    */
   freeRelay(relay: RelayEntry): boolean {
-    const idx = this.relayTable.findIndex((e) => e.equals(relay));
+    const idx = this._relayTable.findIndex((e) => e.equals(relay));
     if (idx < 0) {
       return false;
     }
@@ -126,7 +132,7 @@ export class UDPRelayHandler extends EventEmitter {
     this.emit("destroy", relay);
 
     this.socketPool.returnPort(relay.port);
-    this.relayTable = this.relayTable.filter((_, i) => i !== idx); // TODO: Ugh
+    this._relayTable = this.relayTable.filter((_, i) => i !== idx);
 
     activeRelayGauge.dec();
 
@@ -137,7 +143,7 @@ export class UDPRelayHandler extends EventEmitter {
    * Free all relay entries.
    */
   clear() {
-    this.relayTable.forEach((entry) => this.freeRelay(entry));
+    this._relayTable.forEach((entry) => this.freeRelay(entry));
 
     activeRelayGauge.reset();
   }
@@ -152,11 +158,11 @@ export class UDPRelayHandler extends EventEmitter {
   relay(msg: Buffer, sender: NetAddress, target: number): boolean {
     const measure = relayDurationHistogram.startTimer();
 
-    const senderRelay = this.relayTable.find(
+    const senderRelay = this._relayTable.find(
       (r) =>
         r.address.port === sender.port && r.address.address === sender.address,
     );
-    const targetRelay = this.relayTable.find((r) => r.port === target);
+    const targetRelay = this._relayTable.find((r) => r.port === target);
 
     if (!senderRelay || !targetRelay) {
       // We don't have a relay for the sender, target, or both

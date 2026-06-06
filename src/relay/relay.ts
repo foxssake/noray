@@ -23,7 +23,7 @@ export const udpRelayHandler = new UDPRelayHandler({
 
 export const udpRemoteRegistrar = new UDPRemoteRegistrar({
   hostRepository,
-  udpRelayHandler,
+  // udpRelayHandler, // TODO: Wtf??
 });
 const log = logger.child({ name: "mod:relay" });
 
