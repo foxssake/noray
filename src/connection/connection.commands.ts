@@ -1,6 +1,6 @@
 import { HostRepository } from "../hosts/host.repository.ts";
 import { NodeSocketReactor } from "@foxssake/trimsock-node";
-import { RemoteInfo } from "node:dgram";
+import { type RemoteInfo } from "node:dgram";
 import assert from "node:assert";
 import logger from "../logger.ts";
 import { udpRelayHandler } from "../relay/relay.ts";

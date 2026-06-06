@@ -1,6 +1,6 @@
 import * as net from "node:net";
-import { HostEntity } from "./host.entity.ts";
 import { Repository } from "../repository.ts";
+import { type HostEntity } from "./host.entity.ts";
 
 /**
  * Repository for tracking hosts.

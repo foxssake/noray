@@ -11,11 +11,17 @@ export class UnknownItemError extends Error { }
  */
 export class Repository<T, K = string> {
   protected items = new Map<K, T>();
+  private getId: IdMapper<T, K>;
+  private merge: ItemMerger<T>;
 
   constructor(
-    private getId: IdMapper<T, K>,
-    private merge: ItemMerger<T> = (a, b) => ({ ...a, ...b }),
-  ) { }
+    // TODO: node doesn't support `private getId: ...` syntax...
+    getId: IdMapper<T, K>,
+    merge: ItemMerger<T> = (a, b) => ({ ...a, ...b }),
+  ) {
+    this.getId = getId;
+    this.merge = merge;
+  }
 
   /**
    * Add item to repository.
