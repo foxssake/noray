@@ -1,13 +1,11 @@
-/* eslint-disable */
-import { RelayEntry } from "./relay.entry.mjs";
-/* eslint-enable */
-import { NetAddress } from "./net.address.mjs";
-import { UDPSocketPool } from "./udp.socket.pool.mjs";
-import { time } from "../utils.mjs";
+import { RelayEntry } from "./relay.entry";
+import { NetAddress } from "./net.address";
+import { UDPSocketPool } from "./udp.socket.pool.js";
+import { time } from "../utils";
 import { EventEmitter } from "node:events";
-import logger from "../logger.mjs";
+import logger from "../logger";
 import * as prometheus from "prom-client";
-import { metricsRegistry } from "../metrics/metrics.registry.js";
+import { metricsRegistry } from "../metrics/metrics.registry";
 
 const log = logger.child({ name: "UDPRelayHandler" });
 
@@ -35,6 +33,10 @@ const activeRelayGauge = new prometheus.Gauge({
   registers: [metricsRegistry],
 });
 
+export interface UDPRelayHandlerOptions {
+  socketPool?: UDPSocketPool;
+}
+
 /**
  * Class implementing the actual relay logic.
  *
@@ -52,21 +54,20 @@ const activeRelayGauge = new prometheus.Gauge({
  * to Host. This way, Client will always appear as Noray:2 to the Host.
  */
 export class UDPRelayHandler extends EventEmitter {
-  /** @type {UDPSocketPool} */
-  #socketPool;
-
-  /** @type {RelayEntry[]} */
-  #relayTable = [];
+  /**
+   * Socketp pool used for relays.
+   */
+  public readonly socketPool: UDPSocketPool;
 
   /**
-   * Construct instance.
-   * @param {object} options Options
-   * @param {UDPSocketPool} [options.socketPool] Socket pool
+   * Relay table used for relaying.
    */
-  constructor(options) {
+  public readonly relayTable: RelayEntry[] = [];
+
+  constructor(options: UDPRelayHandlerOptions) {
     super();
 
-    this.#socketPool = options?.socketPool ?? new UDPSocketPool();
+    this.socketPool = options?.socketPool ?? new UDPSocketPool();
   }
 
   /**
@@ -75,29 +76,27 @@ export class UDPRelayHandler extends EventEmitter {
    * If there's already a relay for the address, returns that.
    * NOTE: This modifies the incoming relay and returns the same instance.
    *
-   * @param {RelayEntry} relay Relay
-   * @return {RelayEntry} Resulting relay
    * @fires UDPRelayHandler#create
    */
-  createRelay(relay) {
+  createRelay(relay: RelayEntry): RelayEntry {
     log.debug({ relay }, "Creating relay");
     if (this.hasRelay(relay)) {
       // We already have this relay entry
       log.trace({ relay }, "Relay already exists, ignoring");
-      return this.#relayTable.find((e) => e.equals(relay));
+      return this.relayTable.find((e) => e.equals(relay))!!;
     }
 
-    relay.port = this.#socketPool.getPort();
+    relay.port = this.socketPool.getPort();
     this.emit("create", relay);
 
-    const socket = this.#socketPool.getSocket(relay.port);
+    const socket = this.socketPool.getSocket(relay.port)!!;
     socket.removeAllListeners("message").on("message", (msg, rinfo) => {
       this.relay(msg, NetAddress.fromRinfo(rinfo), relay.port);
     });
 
     relay.lastReceived = time();
     relay.created = time();
-    this.#relayTable.push(relay);
+    this.relayTable.push(relay);
     log.trace({ relay }, "Relay created");
 
     activeRelayGauge.inc();
@@ -109,29 +108,25 @@ export class UDPRelayHandler extends EventEmitter {
    * Check if relay already exists in the table.
    *
    * NOTE: This only compares the addresses, not the allocated port.
-   * @param {RelayEntry} relay Relay
-   * @returns {boolean} True if relay already exists
    */
-  hasRelay(relay) {
-    return this.#relayTable.find((e) => e.equals(relay)) !== undefined;
+  hasRelay(relay: RelayEntry): boolean {
+    return this.relayTable.find((e) => e.equals(relay)) !== undefined;
   }
 
   /**
    * Free a relay entry, removing it from the table and freeing any associated resources.
-   * @param {RelayEntry} relay Relay
-   * @returns {boolean} True if a relay was freed
    * @fires UDPRelayHandler#destroy
    */
-  freeRelay(relay) {
-    const idx = this.#relayTable.findIndex((e) => e.equals(relay));
+  freeRelay(relay: RelayEntry): boolean {
+    const idx = this.relayTable.findIndex((e) => e.equals(relay));
     if (idx < 0) {
       return false;
     }
 
     this.emit("destroy", relay);
 
-    this.#socketPool.returnPort(relay.port);
-    this.#relayTable = this.#relayTable.filter((_, i) => i !== idx);
+    this.socketPool.returnPort(relay.port);
+    this.relayTable = this.relayTable.filter((_, i) => i !== idx); // TODO: Ugh
 
     activeRelayGauge.dec();
 
@@ -149,21 +144,19 @@ export class UDPRelayHandler extends EventEmitter {
 
   /**
    * Relay a message from a given sender to target.
-   * @param {Buffer} msg Message
-   * @param {NetAddress} sender Sender address
-   * @param {number} target Target port
-   * @returns {Promise<boolean>} True on success
+   *
    * @fires UDPRelayHandler#transmit
    * @fires UDPRelayHandler#drop
    */
-  relay(msg, sender, target) {
+  // TODO: Why was the return type documented as Promise<boolean>?
+  relay(msg: Buffer, sender: NetAddress, target: number): boolean {
     const measure = relayDurationHistogram.startTimer();
 
-    const senderRelay = this.#relayTable.find(
+    const senderRelay = this.relayTable.find(
       (r) =>
         r.address.port === sender.port && r.address.address === sender.address,
     );
-    const targetRelay = this.#relayTable.find((r) => r.port === target);
+    const targetRelay = this.relayTable.find((r) => r.port === target);
 
     if (!senderRelay || !targetRelay) {
       // We don't have a relay for the sender, target, or both
@@ -175,7 +168,7 @@ export class UDPRelayHandler extends EventEmitter {
       return false;
     }
 
-    const socket = this.#socketPool.getSocket(senderRelay.port);
+    const socket = this.socketPool.getSocket(senderRelay.port);
     if (!socket) {
       // For some reason we don't have the socket
       return false;
@@ -193,22 +186,6 @@ export class UDPRelayHandler extends EventEmitter {
     measure();
 
     return true;
-  }
-
-  /**
-   * Socket pool used for relays.
-   * @type {UDPSocketPool}
-   */
-  get socketPool() {
-    return this.#socketPool;
-  }
-
-  /**
-   * Relay table used for relays.
-   * @type {RelayEntry[]}
-   */
-  get relayTable() {
-    return [...this.#relayTable];
   }
 }
 

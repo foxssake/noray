@@ -164,6 +164,32 @@ export function formatByteSize(size: number): string {
 }
 
 /**
+ * Format bandwidth in bytes/ec to a human readable form.
+ *
+ * E.g. 3072 becomes 3kbps
+ */
+export function formatBandwidth(bandwidth: number): string {
+  // TODO: Extract shared logic
+  const postfixes = [
+    "bps",
+    "kbps",
+    "Mbps",
+    "Gbps",
+    "Tbps",
+    "Pbps",
+    "Ebps",
+    "Zbps",
+    "Ybps",
+  ];
+  const pfi =
+    (postfixes.length +
+      postfixes.findIndex((_, i) => bandwidth < Math.pow(1024, i + 1))) %
+    postfixes.length;
+
+  return bandwidth / Math.pow(1024, pfi) + postfixes[pfi];
+}
+
+/**
  * Format a duration to a human readable form.
  *
  * For example, 720 becomes 12min.

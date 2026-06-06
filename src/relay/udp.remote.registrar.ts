@@ -1,12 +1,10 @@
-/* eslint-disable */
-import { HostRepository } from "../hosts/host.repository.js";
-/* eslint-enable */
+import { HostRepository } from "../hosts/host.repository";
 import dgram from "node:dgram";
 import assert from "node:assert";
-import logger from "../logger.mjs";
-import { requireParam } from "../assertions.mjs";
+import logger from "../logger";
+import { requireParam } from "../assertions";
 import * as prometheus from "prom-client";
-import { metricsRegistry } from "../metrics/metrics.registry.js";
+import { metricsRegistry } from "../metrics/metrics.registry";
 
 const log = logger.child({ name: "UDPRemoteRegistrar" });
 
@@ -28,6 +26,11 @@ const registerRepatCounter = new prometheus.Counter({
   registers: [metricsRegistry],
 });
 
+export interface UDPRemoteRegistrarOptions {
+  hostRepository: HostRepository;
+  socket?: dgram.Socket;
+}
+
 /**
  * @summary Class for remote address registration over UDP.
  *
@@ -40,76 +43,53 @@ const registerRepatCounter = new prometheus.Counter({
  * clients can just spam the request until they receive a reply.
  */
 export class UDPRemoteRegistrar {
-  /** @type {dgram.Socket} */
-  #socket;
-
-  /** @type {HostRepository} */
-  #hostRepository;
-
   /**
-   * Construct instance.
-   * @param {object} options Options
-   * @param {HostRepository} options.hostRepository Host repository
-   * @param {dgram.Socket} [options.socket] Socket
+   * Socket listening for requests.
    */
-  constructor(options) {
-    this.#hostRepository = requireParam(options.hostRepository);
-    this.#socket = options.socket ?? dgram.createSocket("udp4");
+  public readonly socket: dgram.Socket;
+
+  private hostRepository: HostRepository;
+
+  constructor(options: UDPRemoteRegistrarOptions) {
+    this.hostRepository = requireParam(options.hostRepository);
+    this.socket = options.socket ?? dgram.createSocket("udp4");
   }
 
   /**
    * Start listening for incoming requests.
-   * @param {number} [port=0] Port
-   * @param {string} [address='0.0.0.0'] Address
-   * @returns {Promise<void>}
    */
-  listen(port, address) {
+  listen(port: number = 0, address: string = "0.0.0.0"): Promise<void> {
     return new Promise((resolve) => {
-      port ??= 0;
-      address ??= "0.0.0.0";
-
-      this.#socket.on("message", (msg, rinfo) => this.#handle(msg, rinfo));
-      this.#socket.bind(port, address, () => {
-        const address = this.#socket.address();
+      this.socket.on("message", (msg, rinfo) => this.handle(msg, rinfo));
+      this.socket.bind(port, address, () => {
+        const address = this.socket.address();
         log.info("Listening on %s:%s", address.address, address.port);
         resolve();
       });
     });
   }
 
-  /**
-   * Socket listening for requests.
-   * @type {dgram.Socket}
-   */
-  get socket() {
-    return this.#socket;
-  }
-
-  /**
-   * @param {Buffer} msg
-   * @param {dgram.RemoteInfo} rinfo
-   */
-  async #handle(msg, rinfo) {
+  private async handle(msg: Buffer, rinfo: dgram.RemoteInfo) {
     try {
       const pid = msg.toString("utf8");
       log.debug({ pid, rinfo }, "Received UDP relay request");
 
-      const host = this.#hostRepository.findByPid(pid);
+      const host = this.hostRepository.findByPid(pid);
       assert(host, "Unknown host pid!");
 
       if (host.rinfo) {
         // Host has already remote info registered
-        this.#socket.send("OK", rinfo.port, rinfo.address);
+        this.socket.send("OK", rinfo.port, rinfo.address);
         registerRepatCounter.inc();
         return;
       }
 
       host.rinfo = rinfo;
-      this.#socket.send("OK", rinfo.port, rinfo.address);
+      this.socket.send("OK", rinfo.port, rinfo.address);
       registerSuccessCounter.inc();
-    } catch (e) {
+    } catch (e: any) {
       registerFailCounter.inc();
-      this.#socket.send(e.message ?? "Error", rinfo.port, rinfo.address);
+      this.socket.send(e.message ?? "Error", rinfo.port, rinfo.address);
     }
   }
 }

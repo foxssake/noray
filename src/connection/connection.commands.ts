@@ -3,9 +3,9 @@ import { NodeSocketReactor } from "@foxssake/trimsock-node";
 import { RemoteInfo } from "node:dgram";
 import assert from "node:assert";
 import logger from "../logger";
-import { udpRelayHandler } from "../relay/relay.mjs";
-import { RelayEntry } from "../relay/relay.entry.mjs";
-import { NetAddress } from "../relay/net.address.mjs";
+import { udpRelayHandler } from "../relay/relay.js";
+import { RelayEntry } from "../relay/relay.entry.js";
+import { NetAddress } from "../relay/net.address.js";
 
 export function handleConnect(hostRepository: HostRepository) {
   return function(server: NodeSocketReactor) {
@@ -97,7 +97,7 @@ function getRelay(rinfo: RemoteInfo) {
   const log = logger.child({ name: "getRelay" });
   log.trace({ rinfo }, "Ensuring relay for remote");
   const relayEntry = udpRelayHandler.createRelay(
-    new RelayEntry({ address: NetAddress.fromRinfo(rinfo) }),
+    new RelayEntry({ address: NetAddress.fromRinfo(rinfo), port: rinfo.port }),
   );
 
   log.trace(
