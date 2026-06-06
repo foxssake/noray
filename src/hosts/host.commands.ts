@@ -3,7 +3,7 @@ import { NodeSocketReactor } from "@foxssake/trimsock-node";
 import { makeHost } from "./host.entity";
 import logger from "../logger";
 import * as prometheus from "prom-client";
-import { metricsRegistry } from "../metrics/metrics.registry.mjs";
+import { metricsRegistry } from "../metrics/metrics.registry.js";
 
 const activeHostsGauge = new prometheus.Gauge({
   name: "noray_active_hosts",

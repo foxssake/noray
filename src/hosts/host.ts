@@ -1,4 +1,4 @@
-import { Noray } from "../noray.mjs";
+import { Noray } from "../noray.js";
 import logger from "../logger";
 import { handleRegisterHost } from "./host.commands";
 import { HostRepository } from "./host.repository";

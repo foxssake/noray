@@ -9,7 +9,7 @@ export class UnknownItemError extends Error { }
 /**
  * Base class for repositories.
  */
-export class Repository<T, K> {
+export class Repository<T, K = string> {
   protected items = new Map<K, T>();
 
   constructor(
