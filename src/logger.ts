@@ -1,6 +1,6 @@
 import pino from "pino";
 import * as dotenv from "dotenv";
-import { enumerated } from "./config.parsers";
+import { enumerated } from "./config.parsers.ts";
 
 export const loglevels = Object.freeze([
   "silent",

@@ -1,5 +1,5 @@
-import { NetAddress } from "./net.address";
-import { time } from "../utils";
+import { NetAddress } from "./net.address.ts";
+import { time } from "../utils.ts";
 
 export interface RelayEntryData {
   /**

@@ -1,7 +1,7 @@
-import { NetAddress } from "./net.address";
-import { UDPRelayHandler } from "./udp.relay.handler.js";
-import logger from "../logger";
-import { RelayEntry } from "./relay.entry.js";
+import { NetAddress } from "./net.address.ts";
+import { UDPRelayHandler } from "./udp.relay.handler.ts";
+import logger from "../logger.ts";
+import { RelayEntry } from "./relay.entry.ts";
 
 const log = logger.child({ name: "DynamicRelaying" });
 

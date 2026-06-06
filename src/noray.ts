@@ -1,17 +1,17 @@
 import * as net from "node:net";
 import { EventEmitter } from "node:events";
-import logger from "./logger";
-import { config } from "./config";
+import logger from "./logger.ts";
+import { config } from "./config.ts";
 import { NodeSocketReactor } from "@foxssake/trimsock-node";
-import { promiseEvent } from "./utils";
+import { promiseEvent } from "./utils.ts";
 
 export type NorayHook = (noray: Noray) => void;
 
 const defaultModules = [
-  "metrics/metrics.mjs",
-  "relay/relay.mjs",
-  "hosts/host.mjs",
-  "connection/connection.mjs",
+  "metrics/metrics.ts",
+  "relay/relay.ts",
+  "hosts/host.ts",
+  "connection/connection.ts",
 ];
 
 export class Noray extends EventEmitter {
@@ -28,7 +28,7 @@ export class Noray extends EventEmitter {
     this.hooks.push(hok);
   }
 
-  async start(modules: string[]): Promise<void> {
+  async start(modules: string[] = defaultModules): Promise<void> {
     modules ??= defaultModules;
 
     this.log.info("Starting Noray");

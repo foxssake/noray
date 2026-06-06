@@ -1,11 +1,11 @@
-import { HostRepository } from "../hosts/host.repository.js";
+import { HostRepository } from "../hosts/host.repository.ts";
 import { NodeSocketReactor } from "@foxssake/trimsock-node";
 import { RemoteInfo } from "node:dgram";
 import assert from "node:assert";
-import logger from "../logger";
-import { udpRelayHandler } from "../relay/relay.js";
-import { RelayEntry } from "../relay/relay.entry.js";
-import { NetAddress } from "../relay/net.address.js";
+import logger from "../logger.ts";
+import { udpRelayHandler } from "../relay/relay.ts";
+import { RelayEntry } from "../relay/relay.entry.ts";
+import { NetAddress } from "../relay/net.address.ts";
 
 export function handleConnect(hostRepository: HostRepository) {
   return function(server: NodeSocketReactor) {

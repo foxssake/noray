@@ -1,7 +1,7 @@
-import { Noray } from "../noray.js";
-import logger from "../logger";
-import { handleConnect, handleConnectRelay } from "./connection.commands";
-import { hostRepository } from "../hosts/host";
+import { Noray } from "../noray.ts";
+import logger from "../logger.ts";
+import { handleConnect, handleConnectRelay } from "./connection.commands.ts";
+import { hostRepository } from "../hosts/host.ts";
 
 const log = logger.child({ name: "mod:connection" });
 

@@ -1,9 +1,9 @@
 import * as http from "node:http";
-import { Noray } from "../noray.js";
-import logger from "../logger";
+import { Noray } from "../noray.ts";
+import logger from "../logger.ts";
 import * as prometheus from "prom-client";
-import { config } from "../config";
-import { metricsRegistry } from "./metrics.registry";
+import { config } from "../config.ts";
+import { metricsRegistry } from "./metrics.registry.ts";
 
 const log = logger.child({ name: "mod:metrics" });
 

@@ -6,8 +6,8 @@ import {
   integer,
   number,
   ports,
-} from "./config.parsers";
-import logger, { getLogLevel } from "./logger.js";
+} from "./config.parsers.ts";
+import logger, { getLogLevel } from "./logger.ts";
 import { urlAlphabet } from "nanoid";
 
 type ConfigEnv = { [key: string]: string | undefined };
@@ -19,7 +19,7 @@ export function readConfig(env: ConfigEnv) {
       charset: env.NORAY_OID_CHARSET ?? urlAlphabet,
     },
 
-    words_oid: {
+    wordsOid: {
       enabled: boolean(env.NORAY_ENABLE_WORDS_OID) ?? false,
       length: integer(env.NORAY_WORDS_OID_LENGTH) ?? 3,
     },
@@ -77,7 +77,7 @@ export function readLiveConfig() {
 
 export type NorayConfig = ReturnType<typeof readConfig>;
 export type OidConfig = NorayConfig["oid"];
-export type WordsOidConfig = NorayConfig["words_oid"];
+export type WordsOidConfig = NorayConfig["wordsOid"];
 export type PidConfig = NorayConfig["pid"];
 export type SocketConfig = NorayConfig["socket"];
 export type HttpConfig = NorayConfig["http"];

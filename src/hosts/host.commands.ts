@@ -1,9 +1,9 @@
-import { HostRepository } from "./host.repository";
+import { HostRepository } from "./host.repository.ts";
 import { NodeSocketReactor } from "@foxssake/trimsock-node";
-import { makeHost } from "./host.entity";
-import logger from "../logger";
+import { makeHost } from "./host.entity.ts";
+import logger from "../logger.ts";
 import * as prometheus from "prom-client";
-import { metricsRegistry } from "../metrics/metrics.registry.js";
+import { metricsRegistry } from "../metrics/metrics.registry.ts";
 
 const activeHostsGauge = new prometheus.Gauge({
   name: "noray_active_hosts",

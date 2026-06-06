@@ -1,30 +1,27 @@
-import { config } from "../config";
+import { config } from "../config.ts";
 import {
   constrainGlobalBandwidth,
   constrainIndividualBandwidth,
   constrainLifetime,
   constrainTraffic,
-} from "./constraints";
-import { UDPRelayHandler } from "./udp.relay.handler.js";
-import { Noray } from "../noray.js";
-import { cleanupUdpRelayTable } from "./udp.relay.cleanup.js";
-import logger from "../logger";
-import { formatByteSize, formatDuration } from "../utils";
-import { UDPRemoteRegistrar } from "./udp.remote.registrar.js";
-import { hostRepository } from "../hosts/host.js";
-import { useDynamicRelay } from "./dynamic.relaying.js";
-import { UDPSocketPool } from "./udp.socket.pool.js";
+} from "./constraints.ts";
+import { UDPRelayHandler } from "./udp.relay.handler.ts";
+import { Noray } from "../noray.ts";
+import { cleanupUdpRelayTable } from "./udp.relay.cleanup.ts";
+import logger from "../logger.ts";
+import { formatByteSize, formatDuration } from "../utils.ts";
+import { UDPRemoteRegistrar } from "./udp.remote.registrar.ts";
+import { hostRepository } from "../hosts/host.ts";
+import { useDynamicRelay } from "./dynamic.relaying.ts";
+import { UDPSocketPool } from "./udp.socket.pool.ts";
 
 export const udpSocketPool = new UDPSocketPool();
 
 export const udpRelayHandler = new UDPRelayHandler({
   socketPool: udpSocketPool,
 });
+export const udpRemoteRegistrar = new UDPRemoteRegistrar({ hostRepository });
 
-export const udpRemoteRegistrar = new UDPRemoteRegistrar({
-  hostRepository,
-  // udpRelayHandler, // TODO: Wtf??
-});
 const log = logger.child({ name: "mod:relay" });
 
 Noray.hook(async (noray) => {

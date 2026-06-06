@@ -1,8 +1,8 @@
-import { UDPRelayHandler } from "./udp.relay.handler.js";
-import { time } from "../utils";
+import { UDPRelayHandler } from "./udp.relay.handler.ts";
+import { time } from "../utils.ts";
 import * as prometheus from "prom-client";
-import { metricsRegistry } from "../metrics/metrics.registry";
-import { RelayEntry } from "./relay.entry";
+import { metricsRegistry } from "../metrics/metrics.registry.ts";
+import { RelayEntry } from "./relay.entry.ts";
 
 const expiredRelayCounter = new prometheus.Counter({
   name: "noray_relay_expired",

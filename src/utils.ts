@@ -1,6 +1,6 @@
 import { randomInt } from "node:crypto";
 import { type EventEmitter } from "node:events";
-import words from "./wordlist";
+import words from "./wordlist.ts";
 
 /**
  * Return current time ( seconds since epoch ).

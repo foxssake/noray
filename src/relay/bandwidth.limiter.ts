@@ -1,6 +1,4 @@
-import assert from "node:assert";
-import { requireParam } from "../assertions";
-import { formatBandwidth, time } from "../utils";
+import { formatBandwidth, time } from "../utils.ts";
 
 /**
  * Constructor options for [BandwidthLimiter]

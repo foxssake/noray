@@ -2,12 +2,13 @@
 	"name": "@foxssake/noray",
 	"version": "1.5.2",
 	"description": "Online multiplayer orchestrator and potential game platform",
-	"main": "src/noray.mjs",
+	"main": "src/noray.ts",
+	"type": "module",
 	"bin": {
-		"noray": "bin/noray.mjs"
+		"noray": "bin/noray.ts"
 	},
 	"scripts": {
-		"lint": "eslint --ext .mjs src",
+		"lint": "eslint --ext .ts src",
 		"doc": "jsdoc -c .jsdoc.js src",
 		"test": "node --test test/spec/**/*.test.ts",
 		"test:e2e": "node --test test/e2e/**/*.test.ts | node scripts/taplog.mjs utap \"pino-pretty -c\"",

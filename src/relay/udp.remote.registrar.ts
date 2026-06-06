@@ -1,10 +1,10 @@
-import { HostRepository } from "../hosts/host.repository";
+import { HostRepository } from "../hosts/host.repository.ts";
 import dgram from "node:dgram";
 import assert from "node:assert";
-import logger from "../logger";
-import { requireParam } from "../assertions";
+import logger from "../logger.ts";
+import { requireParam } from "../assertions.ts";
 import * as prometheus from "prom-client";
-import { metricsRegistry } from "../metrics/metrics.registry";
+import { metricsRegistry } from "../metrics/metrics.registry.ts";
 
 const log = logger.child({ name: "UDPRemoteRegistrar" });
 

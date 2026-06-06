@@ -1,11 +1,11 @@
 import * as net from "node:net";
 import * as dgram from "node:dgram";
 import * as nanoid from "nanoid";
-import { config } from "../config";
-import { generateWordId } from "../utils";
+import { config } from "../config.ts";
+import { generateWordId } from "../utils.ts";
 
-const generateOID = config.words_oid.enabled
-  ? () => generateWordId(config.words_oid.length)
+const generateOID = config.wordsOid.enabled
+  ? () => generateWordId(config.wordsOid.length)
   : nanoid.customAlphabet(config.oid.charset, config.oid.length);
 const generatePID = nanoid.customAlphabet(
   config.pid.charset,

@@ -1,7 +1,7 @@
-import { Noray } from "../noray.js";
-import logger from "../logger";
-import { handleRegisterHost } from "./host.commands";
-import { HostRepository } from "./host.repository";
+import { Noray } from "../noray.ts";
+import logger from "../logger.ts";
+import { handleRegisterHost } from "./host.commands.ts";
+import { HostRepository } from "./host.repository.ts";
 
 const log = logger.child({ name: "mod:host" });
 

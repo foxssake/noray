@@ -1,11 +1,11 @@
-import { RelayEntry } from "./relay.entry";
-import { NetAddress } from "./net.address";
-import { UDPSocketPool } from "./udp.socket.pool.js";
-import { time } from "../utils";
+import { RelayEntry } from "./relay.entry.ts";
+import { NetAddress } from "./net.address.ts";
+import { UDPSocketPool } from "./udp.socket.pool.ts";
+import { time } from "../utils.ts";
 import { EventEmitter } from "node:events";
-import logger from "../logger";
+import logger from "../logger.ts";
 import * as prometheus from "prom-client";
-import { metricsRegistry } from "../metrics/metrics.registry";
+import { metricsRegistry } from "../metrics/metrics.registry.ts";
 
 const log = logger.child({ name: "UDPRelayHandler" });
 
