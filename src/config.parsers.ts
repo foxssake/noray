@@ -30,7 +30,7 @@ export function number(value: string | undefined): number | undefined {
  * @param values Allowed values
  * @returns Allowed value or undefined
  */
-export function enumerated<T>(value: T, values: T[]): T | undefined {
+export function enumerated<T>(value: T, values: readonly T[]): T | undefined {
   return values.includes(value) ? value : undefined;
 }
 
