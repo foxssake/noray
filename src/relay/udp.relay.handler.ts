@@ -70,7 +70,7 @@ export class UDPRelayHandler extends EventEmitter {
     return this._relayTable;
   }
 
-  constructor(options: UDPRelayHandlerOptions) {
+  constructor(options?: UDPRelayHandlerOptions) {
     super();
 
     this.socketPool = options?.socketPool ?? new UDPSocketPool();
