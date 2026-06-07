@@ -89,13 +89,13 @@ export class UDPRelayHandler extends EventEmitter {
     if (this.hasRelay(relay)) {
       // We already have this relay entry
       log.trace({ relay }, "Relay already exists, ignoring");
-      return this._relayTable.find((e) => e.equals(relay))!!;
+      return this._relayTable.find((e) => e.equals(relay))!;
     }
 
     relay.port = this.socketPool.getPort();
     this.emit("create", relay);
 
-    const socket = this.socketPool.getSocket(relay.port)!!;
+    const socket = this.socketPool.getSocket(relay.port)!;
     socket.removeAllListeners("message").on("message", (msg, rinfo) => {
       this.relay(msg, NetAddress.fromRinfo(rinfo), relay.port);
     });

@@ -13,7 +13,7 @@ import { time } from "../utils.ts";
 export function constrainIndividualBandwidth(
   relayHandler: UDPRelayHandler,
   traffic: number,
-  interval: number = 1,
+  interval = 1,
 ) {
   const limiters = new Map();
 
@@ -47,7 +47,7 @@ export function constrainIndividualBandwidth(
 export function constrainGlobalBandwidth(
   relayHandler: UDPRelayHandler,
   traffic: number,
-  interval: number = 1,
+  interval = 1,
 ) {
   const limiter = new BandwidthLimiter({
     maxTraffic: traffic,
@@ -68,7 +68,7 @@ export function constrainLifetime(
   relayHandler: UDPRelayHandler,
   duration: number,
 ) {
-  relayHandler.on("transmit", (source, _target, _message) => {
+  relayHandler.on("transmit", (source) => {
     // TODO: Prefer custom exception
     assert(
       time() - source.created < duration,

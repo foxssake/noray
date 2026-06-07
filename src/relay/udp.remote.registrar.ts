@@ -57,7 +57,7 @@ export class UDPRemoteRegistrar {
   /**
    * Start listening for incoming requests.
    */
-  listen(port: number = 0, address: string = "0.0.0.0"): Promise<void> {
+  listen(port = 0, address = "0.0.0.0"): Promise<void> {
     return new Promise((resolve) => {
       this.socket.on("message", (msg, rinfo) => this.handle(msg, rinfo));
       this.socket.bind(port, address, () => {
@@ -86,9 +86,10 @@ export class UDPRemoteRegistrar {
       host.rinfo = rinfo;
       this.socket.send("OK", rinfo.port, rinfo.address);
       registerSuccessCounter.inc();
-    } catch (e: any) {
+    } catch (e) {
       registerFailCounter.inc();
-      this.socket.send(e.message ?? "Error", rinfo.port, rinfo.address);
+      const message = e instanceof Error ? e.message : "Error";
+      this.socket.send(message, rinfo.port, rinfo.address);
     }
   }
 }

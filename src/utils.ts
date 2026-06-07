@@ -23,7 +23,7 @@ export function sleep<T>(seconds: number, value?: T): Promise<T | void> {
 /**
  * Wait for an event on event source.
  */
-export function promiseEvent<T = any>(
+export function promiseEvent<T = unknown>(
   source: EventEmitter,
   event: string,
 ): Promise<T> {
@@ -55,13 +55,14 @@ export function asSingletonFactory<T>(f: () => T): () => T {
  * NOTE: The cache is not limited in any way, use only in cases where
  * the possible number of parameters is limited.
  */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function memoize(f: Function): Function {
   const cache = new Map();
-  return function() {
-    const key = JSON.stringify(arguments);
+  return function(...args: unknown[]) {
+    const key = JSON.stringify(args);
 
     if (!cache.has(key)) {
-      cache.set(key, f(...arguments));
+      cache.set(key, f(...args));
     }
 
     return cache.get(key);
@@ -128,11 +129,11 @@ export function range(n: number): number[] {
  * @returns {Array<Array<T>>} Array of combinations
  * @template T
  */
-export function combine(...arrays: Array<any>): Array<Array<any>> {
+export function combine(...arrays: unknown[][]): unknown[][] {
   const count = arrays.map((a) => a.length).reduce((a, b) => a * b, 1);
   const dimensions = arrays.length;
 
-  const result = range(count) as any[];
+  const result = range(count).map(() => new Array(dimensions));
 
   for (let i = 0; i < count; ++i) {
     const item = new Array(dimensions);
@@ -210,7 +211,8 @@ export function formatDuration(seconds: number): string {
   }).reverse();
 
   const [unit, multiplier] =
-    units.find(([_, f]) => seconds > f) ?? units.at(-1)!!;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    units.find(([_, f]) => seconds > f) ?? units.at(-1)!;
 
   return seconds / multiplier + unit;
 }
@@ -220,7 +222,7 @@ export function formatDuration(seconds: number): string {
  *
  * Used to generate a word based OID For example, FalconTimberYolk
  */
-export function generateWordId(wordCount: number = 3): string {
+export function generateWordId(wordCount = 3): string {
   return range(wordCount)
     .map(() => words[randomInt(words.length)])
     .join("");

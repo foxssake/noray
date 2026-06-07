@@ -140,7 +140,7 @@ export function ports(value: string | undefined): number[] | undefined {
     .filter((p) => p !== undefined)
     .map((p) => [p, p]);
 
-  const absolutes: Array<[number, number]> = ranges
+  const absolutes: [number, number][] = ranges
     .filter((r) => r.includes("-"))
     .map((r) => r.split("-"))
     .map(([from, to]) => [integer(from), integer(to)] as [number, number])

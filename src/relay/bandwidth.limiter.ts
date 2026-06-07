@@ -27,10 +27,10 @@ export class BandwidthLimitExceededError extends Error { }
  * new one is started.
  */
 export class BandwidthLimiter {
-  private interval: number = 1;
+  private interval = 1;
   private maxTraffic: number;
 
-  private traffic: number = 0;
+  private traffic = 0;
   private lastInterval: number = time();
 
   /**

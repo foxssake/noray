@@ -32,7 +32,7 @@ export class UDPSocketPool {
    * @returns Allocated port
    * @throws if allocation fails
    */
-  allocatePort(port: number = 0): Promise<number> {
+  allocatePort(port = 0): Promise<number> {
     return new Promise((resolve, reject) => {
       const socket = dgram.createSocket("udp4");
       socket.once("error", reject);
@@ -84,7 +84,7 @@ export class UDPSocketPool {
    */
   getPort(): number {
     assert(this.freePorts.length > 0, "No more free ports!");
-    return this.freePorts.pop()!!;
+    return this.freePorts.pop()!;
   }
 
   /**

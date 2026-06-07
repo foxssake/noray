@@ -10,7 +10,7 @@ import {
 import logger, { getLogLevel } from "./logger.ts";
 import { urlAlphabet } from "nanoid";
 
-type ConfigEnv = { [key: string]: string | undefined };
+type ConfigEnv = Record<string, string | undefined>;
 
 export function readConfig(env: ConfigEnv) {
   return {

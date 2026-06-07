@@ -59,8 +59,8 @@ export function handleConnectRelay(hostRepository: HostRepository) {
       assert(client, "Unknown client from address");
 
       log.debug("Ensuring relay for both parties");
-      host.relay = getRelay(host.rinfo!!);
-      client.relay = getRelay(client.rinfo!!);
+      host.relay = getRelay(host.rinfo!);
+      client.relay = getRelay(client.rinfo!);
 
       log.debug(
         { host: host.relay, client: client.relay },
@@ -68,11 +68,11 @@ export function handleConnectRelay(hostRepository: HostRepository) {
       );
       server.send(socket, {
         name: "connect-relay",
-        params: [host.relay!!.toString()],
+        params: [host.relay!.toString()],
       });
       server.send(host.socket, {
         name: "connect-relay",
-        params: [client.relay!!.toString()],
+        params: [client.relay!.toString()],
       });
       log.debug(
         {

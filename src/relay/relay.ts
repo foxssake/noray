@@ -27,11 +27,11 @@ const log = logger.child({ name: "mod:relay" });
 Noray.hook(async (noray) => {
   log.info(
     "Starting periodic UDP relay cleanup job, running every %s",
-    formatDuration(config.udpRelay.cleanupInterval!!),
+    formatDuration(config.udpRelay.cleanupInterval!),
   );
   const cleanupJob = setInterval(
-    () => cleanupUdpRelayTable(udpRelayHandler, config.udpRelay.timeout!!),
-    config.udpRelay.cleanupInterval!! * 1000,
+    () => cleanupUdpRelayTable(udpRelayHandler, config.udpRelay.timeout!),
+    config.udpRelay.cleanupInterval! * 1000,
   );
 
   log.info(
@@ -48,9 +48,9 @@ Noray.hook(async (noray) => {
     )
     .catch((e) => log.error(e, "Remote registrar failed to listen!"));
 
-  log.info("Binding %d ports for relaying", config.udpRelay.ports!!.length);
+  log.info("Binding %d ports for relaying", config.udpRelay.ports!.length);
 
-  for (const port of config.udpRelay.ports!!) {
+  for (const port of config.udpRelay.ports!) {
     log.trace("Binding port %d for relay", port);
     try {
       await udpSocketPool.allocatePort(port);
@@ -61,29 +61,29 @@ Noray.hook(async (noray) => {
 
   log.info(
     "Limiting relay bandwidth to %s/s and global bandwidth to %s/s",
-    formatByteSize(config.udpRelay.maxIndividualTraffic!!),
-    formatByteSize(config.udpRelay.maxGlobalTraffic!!),
+    formatByteSize(config.udpRelay.maxIndividualTraffic!),
+    formatByteSize(config.udpRelay.maxGlobalTraffic!),
   );
 
   constrainIndividualBandwidth(
     udpRelayHandler,
-    config.udpRelay.maxIndividualTraffic!!,
+    config.udpRelay.maxIndividualTraffic!,
     config.udpRelay.trafficInterval,
   );
   constrainGlobalBandwidth(
     udpRelayHandler,
-    config.udpRelay.maxGlobalTraffic!!,
+    config.udpRelay.maxGlobalTraffic!,
     config.udpRelay.trafficInterval,
   );
 
   log.info(
     "Blocking relay traffic after %s or %s",
-    formatDuration(config.udpRelay.maxLifetimeDuration!!),
-    formatByteSize(config.udpRelay.maxLifetimeTraffic!!),
+    formatDuration(config.udpRelay.maxLifetimeDuration!),
+    formatByteSize(config.udpRelay.maxLifetimeTraffic!),
   );
 
-  constrainLifetime(udpRelayHandler, config.udpRelay.maxLifetimeDuration!!);
-  constrainTraffic(udpRelayHandler, config.udpRelay.maxLifetimeTraffic!!);
+  constrainLifetime(udpRelayHandler, config.udpRelay.maxLifetimeDuration!);
+  constrainTraffic(udpRelayHandler, config.udpRelay.maxLifetimeTraffic!);
 
   log.info("Applying dynamic relaying");
   useDynamicRelay(udpRelayHandler);
