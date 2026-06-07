@@ -36,7 +36,7 @@
 		"eslint-plugin-n": "^15.0.0",
 		"eslint-plugin-promise": "^6.0.0",
 		"pino-pretty": "^10.0.0",
-		"sinon": "^15.0.4",
+		"sinon": "^22.0.0",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.60.1",
 		"utap": "^0.2.0"
