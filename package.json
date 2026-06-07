@@ -1,54 +1,57 @@
 {
-  "name": "@foxssake/noray",
-  "version": "1.5.1",
-  "description": "Online multiplayer orchestrator and potential game platform",
-  "main": "src/noray.mjs",
-  "bin": {
-    "noray": "bin/noray.mjs"
-  },
-  "scripts": {
-    "lint": "eslint --ext .mjs src",
-    "doc": "jsdoc -c .jsdoc.js src",
-    "test": "node --test test/spec/",
-    "test:e2e": "node --test test/e2e/ | node scripts/taplog.mjs utap \"pino-pretty -c\"",
-    "start": "node bin/noray.mjs | pino-pretty",
-    "start:prod": "NODE_ENV=production node bin/noray.mjs"
-  },
-  "keywords": [
-    "online",
-    "multiplayer",
-    "orchestrator",
-    "relay",
-    "nat"
-  ],
-  "author": "Tamas Galffy",
-  "license": "MIT",
-  "repository": "github:foxssake/noray",
-  "homepage": "https://github.com/foxssake/noray",
-  "bugs": {
-    "url": "https://github.com/foxssake/noray/issues"
-  },
-  "devDependencies": {
-    "eslint": "^8.36.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-n": "^15.0.0",
-    "eslint-plugin-promise": "^6.0.0",
-    "jsdoc": "^4.0.2",
-    "pino-pretty": "^10.0.0",
-    "sinon": "^15.0.4",
-    "utap": "^0.2.0"
-  },
-  "dependencies": {
-    "@foxssake/trimsock-js": "^0.17.0",
-    "@foxssake/trimsock-node": "^0.17.0",
-    "dotenv": "^16.0.3",
-    "nanoid": "^4.0.1",
-    "pino": "^8.11.0",
-    "prom-client": "^14.2.0"
-  },
-  "files": [
-    "src/*",
-    "bin/*"
-  ]
+	"name": "@foxssake/noray",
+	"version": "1.5.2",
+	"description": "Online multiplayer orchestrator and potential game platform",
+	"main": "src/noray.mjs",
+	"bin": {
+		"noray": "bin/noray.mjs"
+	},
+	"scripts": {
+		"lint": "eslint --ext .mjs src",
+		"doc": "jsdoc -c .jsdoc.js src",
+		"test": "node --test test/spec/",
+		"test:e2e": "node --test test/e2e/ | node scripts/taplog.mjs utap \"pino-pretty -c\"",
+		"start": "node bin/noray.mjs | pino-pretty",
+		"start:prod": "NODE_ENV=production node bin/noray.mjs"
+	},
+	"keywords": [
+		"online",
+		"multiplayer",
+		"orchestrator",
+		"relay",
+		"nat"
+	],
+	"author": "Tamas Galffy",
+	"license": "MIT",
+	"repository": "github:foxssake/noray",
+	"homepage": "https://github.com/foxssake/noray",
+	"bugs": {
+		"url": "https://github.com/foxssake/noray/issues"
+	},
+	"devDependencies": {
+		"eslint": "^8.36.0",
+		"eslint-config-standard": "^17.0.0",
+		"eslint-plugin-import": "^2.25.2",
+		"eslint-plugin-n": "^15.0.0",
+		"eslint-plugin-promise": "^6.0.0",
+		"jsdoc": "^4.0.2",
+		"pino-pretty": "^10.0.0",
+		"sinon": "^15.0.4",
+		"utap": "^0.2.0"
+	},
+	"dependencies": {
+		"@foxssake/trimsock-js": "^0.17.0",
+		"@foxssake/trimsock-node": "^0.17.0",
+		"dotenv": "^16.0.3",
+		"nanoid": "^4.0.1",
+		"pino": "^8.11.0",
+		"prom-client": "^14.2.0"
+	},
+	"engines": {
+		"node": ">=24.16.0"
+	},
+	"files": [
+		"src/*",
+		"bin/*"
+	]
 }

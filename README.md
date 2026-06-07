@@ -48,7 +48,7 @@ transmitted as-is to the appropriate player.
 
 ## Dependencies
 
-* [node](https://nodejs.org/en/download) v18.16 or newer
+* [node](https://nodejs.org/en/download) v24.16 or newer
   * *NOTE:* Older versions may work, but are not explicitly supported
 * [pnpm](https://pnpm.io/installation)
 

@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:24-alpine
 # From https://github.com/pnpm/pnpm/issues/4837
 
 # UDP host for remote address registration
