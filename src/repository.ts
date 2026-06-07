@@ -126,29 +126,3 @@ export class Repository<T, K = string> {
     return id;
   }
 }
-
-/**
- * Create an id mapper that grabs the given field of the object.
- */
-export function fieldIdMapper<T extends Record<string, K>, K>(
-  field: string,
-): IdMapper<T, K> {
-  return (v) => v[field];
-}
-
-/**
- * Create an id mapper that grabs the `id` field of the object.
- */
-export function idFieldMapper<T extends { id: string }>(): IdMapper<T, string> {
-  return (v) => v.id;
-}
-
-/**
- * Create an item merger that uses assignment update the object without changing
- * the reference.
- */
-export function assignMerger<T>(): ItemMerger<T> {
-  return (current, update) => {
-    return { current, ...update } as T;
-  };
-}

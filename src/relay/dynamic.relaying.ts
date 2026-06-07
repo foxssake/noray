@@ -75,7 +75,7 @@ export class DynamicRelaying {
       address: senderAddress,
       port,
     });
-    await relayHandler.createRelay(relay);
+    relayHandler.createRelay(relay);
 
     log.info(
       { relay },

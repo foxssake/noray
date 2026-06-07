@@ -11,6 +11,21 @@ export interface RelayEntryData {
    * The target address where traffic should be forwarded
    */
   address: NetAddress;
+
+  /**
+   * Time the relay was last used to send data.
+   */
+  lastSent?: number;
+
+  /**
+   * Time the relay last received traffic on its port.
+   */
+  lastReceived?: number;
+
+  /**
+   * Time the relay was created.
+   */
+  created?: number;
 }
 
 /**
@@ -30,17 +45,17 @@ export class RelayEntry implements RelayEntryData {
   /**
    * Time the relay was last used to send data.
    */
-  lastSent = 0;
+  lastSent: number;
 
   /**
    * Time the relay last received traffic on its port.
    */
-  lastReceived = 0;
+  lastReceived: number;
 
   /**
    * Time the relay was created.
    */
-  created = time();
+  created: number;
 
   /**
    * Construct entry
@@ -48,6 +63,9 @@ export class RelayEntry implements RelayEntryData {
   constructor(options: RelayEntryData) {
     this.port = options.port;
     this.address = options.address;
+    this.lastSent = options.lastSent ?? 0;
+    this.lastReceived = options.lastReceived ?? 0;
+    this.created = options.created ?? time();
   }
 
   /**

@@ -12,7 +12,9 @@ export function time(): number {
 /**
  * Sleep.
  */
-export function sleep<T>(seconds: number, value: T): Promise<T> {
+export function sleep(seconds: number): Promise<void>;
+export function sleep<T>(seconds: number, value: T): Promise<T>;
+export function sleep<T>(seconds: number, value?: T): Promise<T | void> {
   return new Promise((resolve) =>
     setTimeout(() => resolve(value), seconds * 1000),
   );
