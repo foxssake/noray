@@ -38,7 +38,15 @@ Noray.hook(async (noray) => {
     "Listening on port %d for UDP remote registrars",
     config.udpRelay.registrarPort,
   );
-  udpRemoteRegistrar.listen(config.udpRelay.registrarPort);
+  udpRemoteRegistrar
+    .listen(config.udpRelay.registrarPort)
+    .then(() =>
+      log.info(
+        "Remote registrar started listening on port %d",
+        config.udpRelay.registrarPort,
+      ),
+    )
+    .catch((e) => log.error(e, "Remote registrar failed to listen!"));
 
   log.info("Binding %d ports for relaying", config.udpRelay.ports!!.length);
 
@@ -86,7 +94,13 @@ Noray.hook(async (noray) => {
     clearInterval(cleanupJob);
 
     log.info("Closing UDP remote registrar socket");
-    udpRemoteRegistrar.socket.close();
+    try {
+      // HACK: Removing the try-catch guard results in a "not running" exception?
+      // On node v24.16.0
+      udpRemoteRegistrar.socket.close();
+    } catch (e) {
+      log.warn(e, "Failed to close UDP Remote Registrar socket");
+    }
 
     log.info("Closing socket pool");
     udpSocketPool.clear();
