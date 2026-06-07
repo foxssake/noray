@@ -11,7 +11,7 @@
 		"lint": "eslint --ext .ts src",
 		"doc": "jsdoc -c .jsdoc.js src",
 		"test": "node --test test/spec/**/*.test.ts",
-		"test:e2e": "node --test test/e2e/**/*.test.ts | node scripts/taplog.mjs utap \"pino-pretty -c\"",
+		"test:e2e": "node --test test/e2e/**/*.test.ts | node scripts/taplog.ts utap \"pino-pretty -c\"",
 		"start": "node bin/noray.ts | pino-pretty",
 		"start:prod": "NODE_ENV=production node bin/noray.ts"
 	},
