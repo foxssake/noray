@@ -9,7 +9,6 @@
 	},
 	"scripts": {
 		"lint": "eslint src bin",
-		"doc": "jsdoc -c .jsdoc.js src",
 		"test": "node --test test/spec/**/*.test.ts",
 		"test:e2e": "node --test test/e2e/**/*.test.ts | node scripts/taplog.ts utap \"pino-pretty -c\"",
 		"start": "node bin/noray.ts | pino-pretty",
@@ -36,7 +35,6 @@
 		"eslint-plugin-import": "^2.25.2",
 		"eslint-plugin-n": "^15.0.0",
 		"eslint-plugin-promise": "^6.0.0",
-		"jsdoc": "^4.0.2",
 		"pino-pretty": "^10.0.0",
 		"sinon": "^15.0.4",
 		"typescript": "^6.0.3",
