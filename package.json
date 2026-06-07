@@ -47,8 +47,12 @@
 		"pino": "^8.11.0",
 		"prom-client": "^14.2.0"
 	},
-	"engines": {
-		"node": ">=24.16.0"
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "24.x",
+			"onFail": "download"
+		}
 	},
 	"files": [
 		"src/*",

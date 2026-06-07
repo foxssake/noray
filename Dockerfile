@@ -1,5 +1,4 @@
-FROM node:24-alpine
-# From https://github.com/pnpm/pnpm/issues/4837
+FROM ghcr.io/pnpm/pnpm:11
 
 # UDP host for remote address registration
 EXPOSE 8809/udp
@@ -8,20 +7,8 @@ EXPOSE 8890/tcp
 # HTTP host for Prometheus metrics
 EXPOSE 8891/tcp
 
-COPY . noray
+COPY . /foxssake/noray
+WORKDIR /foxssake/noray
+RUN pnpm install --frozen-lockfile
 
-WORKDIR noray
-
-RUN npm i -g npm@latest; \
- # Install pnpm
- npm install -g pnpm; \
- pnpm --version; \
- pnpm setup; \
- mkdir -p /usr/local/share/pnpm &&\
- export PNPM_HOME="/usr/local/share/pnpm" &&\
- export PATH="$PNPM_HOME:$PATH"; \
- pnpm bin -g && \
- # Install dependencies
- pnpm install
-
-CMD pnpm start:prod
+CMD ["pnpm", "start:prod"]
