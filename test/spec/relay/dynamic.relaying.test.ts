@@ -23,7 +23,7 @@ describe("DynamicRelaying", () => {
     const relayHandler = sinon.createStubInstance(UDPRelayHandler);
     relayHandler.on.callThrough();
     relayHandler.emit.callThrough();
-    sinon.stub(relayHandler, "socketPool").value(socketPool);
+    relayHandler.socketPool = socketPool;
 
     relayHandler.createRelay.resolves(true);
     useDynamicRelay(relayHandler);
@@ -55,7 +55,7 @@ describe("DynamicRelaying", () => {
     );
     clock.restore();
     await sleep(0.05); // Wait for relay to be created
-    clock = sinon.useFakeTimers();
+    // clock = sinon.useFakeTimers();
 
     // Then
     const createdRelay = relayHandler.createRelay.lastCall.args[0];
@@ -107,7 +107,7 @@ describe("DynamicRelaying", () => {
     );
     clock.restore();
     await sleep(0.05); // Wait for relay to be created
-    clock = sinon.useFakeTimers();
+    // clock = sinon.useFakeTimers();
 
     // Then
     assert(relayHandler.createRelay.notCalled);
@@ -146,7 +146,7 @@ describe("DynamicRelaying", () => {
     );
     clock.restore();
     await sleep(0.05); // Wait for relay to be created
-    clock = sinon.useFakeTimers();
+    // clock = sinon.useFakeTimers();
 
     // Then
     assert(relayHandler.createRelay.notCalled);

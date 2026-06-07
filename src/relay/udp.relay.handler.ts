@@ -55,10 +55,10 @@ export interface UDPRelayHandlerOptions {
  */
 export class UDPRelayHandler extends EventEmitter {
   /**
-   * Socketp pool used for relays.
+   * Socket pool used for relays.
    */
-  public readonly socketPool: UDPSocketPool;
-
+  // TODO: Only public for testing, make `public readonly`
+  public socketPool: UDPSocketPool;
   private _relayTable: RelayEntry[] = [];
 
   /**
