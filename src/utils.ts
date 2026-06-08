@@ -227,3 +227,13 @@ export function generateWordId(wordCount = 3): string {
     .map(() => words[randomInt(words.length)])
     .join("");
 }
+
+export type ErrorProvider = () => Error;
+
+export function required<T>(
+  what: T | undefined | null,
+  errorProvider: ErrorProvider = () => new Error("Undefined value!"),
+): T {
+  if (what === null || what === undefined) throw errorProvider();
+  else return what;
+}
