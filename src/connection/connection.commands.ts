@@ -1,14 +1,14 @@
 import { HostRepository } from "../hosts/host.repository.ts";
-import { NodeSocketReactor } from "@foxssake/trimsock-node";
 import { type RemoteInfo } from "node:dgram";
 import assert from "node:assert";
 import logger from "../logger.ts";
 import { udpRelayHandler } from "../relay/relay.ts";
 import { RelayEntry } from "../relay/relay.entry.ts";
 import { NetAddress } from "../relay/net.address.ts";
+import { NorayReactor } from "../noray.ts";
 
 export function handleConnect(hostRepository: HostRepository) {
-  return function(server: NodeSocketReactor) {
+  return function(server: NorayReactor) {
     server.on("connect", (command, exchange) => {
       const log = logger.child({ name: "cmd:connect" });
 
@@ -18,7 +18,7 @@ export function handleConnect(hostRepository: HostRepository) {
       const client = hostRepository.findBySocket(socket);
 
       log.debug(
-        { oid, client: socket.address() },
+        { oid, address: socket.remoteAddress, port: socket.remotePort },
         "Client attempting to connect to host",
       );
 
@@ -42,7 +42,7 @@ export function handleConnect(hostRepository: HostRepository) {
 }
 
 export function handleConnectRelay(hostRepository: HostRepository) {
-  return function(server: NodeSocketReactor) {
+  return function(server: NorayReactor) {
     server.on("connect-relay", (command, exchange) => {
       const log = logger.child({ name: "cmd:connect-relay" });
 
@@ -52,7 +52,11 @@ export function handleConnectRelay(hostRepository: HostRepository) {
       const client = hostRepository.findBySocket(socket);
 
       log.debug(
-        { oid, client: `${socket.remoteAddress}:${socket.remotePort}` },
+        {
+          oid,
+          remoteAddress: socket.remoteAddress,
+          remotePort: socket.remotePort,
+        },
         "Client attempting to connect to host",
       );
       assert(host, "Unknown host oid: " + oid);

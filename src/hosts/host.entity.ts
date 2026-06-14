@@ -1,4 +1,3 @@
-import * as net from "node:net";
 import * as dgram from "node:dgram";
 import * as nanoid from "nanoid";
 import { config } from "../config.ts";
@@ -31,7 +30,7 @@ export interface HostEntity {
   /**
    * Socket.
    */
-  socket: net.Socket;
+  socket: Bun.Socket;
 
   /**
    * Relay port.
@@ -44,7 +43,7 @@ export interface HostEntity {
   rinfo: dgram.RemoteInfo | undefined;
 }
 
-export function makeHost(socket: net.Socket): HostEntity {
+export function makeHost(socket: Bun.Socket): HostEntity {
   return {
     socket,
     oid: generateOID(),

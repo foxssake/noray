@@ -1,9 +1,7 @@
-import * as net from "node:net";
 import { EventEmitter } from "node:events";
 import logger from "./logger.ts";
 import { config } from "./config.ts";
-import { NodeSocketReactor } from "@foxssake/trimsock-node";
-import { promiseEvent } from "./utils.ts";
+import { BunSocketReactor } from "@foxssake/trimsock-bun";
 
 export type NorayHook = (noray: Noray) => void;
 
@@ -14,9 +12,11 @@ const defaultModules = [
   "connection/connection.ts",
 ];
 
+export type NorayReactor = BunSocketReactor;
+
 export class Noray extends EventEmitter {
-  private server!: net.Server;
-  private _reactor!: NodeSocketReactor;
+  private server!: Bun.TCPSocketListener;
+  private _reactor!: NorayReactor;
   private log = logger;
 
   private static hooks: NorayHook[] = [];
@@ -33,7 +33,7 @@ export class Noray extends EventEmitter {
 
     this.log.info("Starting Noray");
 
-    this._reactor = new NodeSocketReactor().onError(
+    this._reactor = new BunSocketReactor().onError(
       (command, exchange, error) => {
         exchange.failOrSend({ name: command.name, text: "" + error });
       },
@@ -55,31 +55,24 @@ export class Noray extends EventEmitter {
 
     // Start server
     this.log.info("Starting TCP server");
-    this.server = this.reactor.serve();
-    this.server.listen(config.socket.port, config.socket.host);
-    this.server.on("listening", () => {
-      this.log.info(
-        "Listening on %s:%s",
-        config.socket.host,
-        config.socket.port,
-      );
-
-      this.server.on("error", (err) => {
-        this.log.error("Listen socket encountered an error!");
-        this.log.error(err);
-      });
-
-      this.server.on("connection", (conn) => {
-        conn.on("error", (err) => {
-          this.log.error("Connection socket encountered an error!");
-          this.log.error(err);
-        });
-      });
-
-      this.emit("listening", config.socket.port, config.socket.host);
+    this.server = this._reactor.listen({
+      hostname: config.socket.host,
+      port: config.socket.port,
+      socket: {
+        error: (socket, error) => {
+          this.log.error(
+            {
+              error,
+              remoteAddress: socket.remoteAddress,
+              remotePort: socket.remotePort,
+            },
+            "Connection socket encountered an error!",
+          );
+        },
+      },
     });
 
-    await promiseEvent(this, "listening");
+    this.emit("listening", config.socket.port, config.socket.host);
     this.log.info("Started noray in %f ms", process.uptime() * 1000.0);
   }
 
@@ -87,7 +80,7 @@ export class Noray extends EventEmitter {
     this.log.info("Shutting down");
 
     this.emit("close");
-    this.server.close();
+    this.server.stop(true);
   }
 
   get reactor() {

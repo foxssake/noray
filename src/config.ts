@@ -1,4 +1,3 @@
-import * as dotenv from "dotenv";
 import {
   boolean,
   byteSize,
@@ -74,7 +73,6 @@ export function readDefaultConfig() {
 }
 
 export function readLiveConfig() {
-  dotenv.config();
   return readConfig(process.env);
 }
 
@@ -86,6 +84,5 @@ export type SocketConfig = NorayConfig["socket"];
 export type HttpConfig = NorayConfig["http"];
 export type UdpRelayConfig = NorayConfig["udpRelay"];
 
-dotenv.config();
 export const config = readLiveConfig();
 logger.info({ config }, "Loaded application config");

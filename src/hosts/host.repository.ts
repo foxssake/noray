@@ -1,4 +1,3 @@
-import * as net from "node:net";
 import { Repository } from "../repository.ts";
 import { type HostEntity } from "./host.entity.ts";
 
@@ -25,7 +24,7 @@ export class HostRepository extends Repository<HostEntity> {
    * @param {net.Socket} socket Socket
    * @returns {HostEntity|undefined} Host
    */
-  findBySocket(socket: net.Socket): HostEntity | undefined {
+  findBySocket(socket: Bun.Socket): HostEntity | undefined {
     // TODO: Cache by socket
     return [...this.list()].find((host) => host.socket === socket);
   }
