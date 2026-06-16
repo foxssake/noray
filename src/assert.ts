@@ -4,7 +4,7 @@ export function assert(
   what: unknown | undefined,
   message = "Assertion failed!",
 ): asserts what {
-  if (what === undefined) throw new AssertionError(message);
+  if (!what) throw new AssertionError(message);
 }
 
 export function fail(message = "Assertion failed!"): never {

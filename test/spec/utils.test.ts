@@ -1,5 +1,4 @@
-import { describe, it, before, after } from "node:test";
-import assert from "node:assert";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import sinon from "sinon";
 import {
   Timeout,
@@ -15,7 +14,7 @@ import {
 
 describe("utils", () => {
   describe("memoized", () => {
-    it("should not call again with same params", () => {
+    test("should not call again with same params", () => {
       // Given
       const expected = 4;
       const fn = sinon.mock();
@@ -28,12 +27,12 @@ describe("utils", () => {
       const actual = mfn(16);
 
       // Then
-      assert.equal(actual, expected);
-      assert(fn.calledOnce);
-      assert(fn.calledOnceWith(16));
+      expect(actual).toBe(expected);
+      expect(fn.calledOnce).toBeTrue();
+      expect(fn.calledOnceWith(16)).toBeTrue();
     });
 
-    it("should call through on unknown", () => {
+    test("should call through on unknown", () => {
       // Given
       const fn = sinon.mock();
       fn.twice().returns(undefined);
@@ -44,20 +43,20 @@ describe("utils", () => {
       mfn(32);
 
       // Then
-      assert(fn.calledTwice);
-      assert(fn.calledWith(16));
-      assert(fn.calledWith(32));
+      expect(fn.calledTwice).toBeTrue();
+      expect(fn.calledWith(16)).toBeTrue();
+      expect(fn.calledWith(32)).toBeTrue();
     });
   });
 
   describe("withTimeout", () => {
     let clock: sinon.SinonFakeTimers;
 
-    before(() => {
+    beforeEach(() => {
       clock = sinon.useFakeTimers();
     });
 
-    it("should return on resolve", async () => {
+    test("should return on resolve", async () => {
       // Given
       const expected = 42;
       const promise = Promise.resolve(expected);
@@ -66,20 +65,15 @@ describe("utils", () => {
       const actual = await withTimeout(promise, 8);
 
       // Then
-      assert.equal(actual, expected);
+      expect(actual).toBe(expected);
     });
 
-    it("should throw on reject", () => {
-      // Given
-      const promise = Promise.reject(new Error());
-
-      // When + Then
-      assert.rejects(() => withTimeout(promise, 8));
+    test("should throw on reject", () => {
+      expect(() => withTimeout(Promise.reject(), 8)).toThrow();
     });
 
-    it("should return symbol on timeout", async () => {
+    test("should return symbol on timeout", async () => {
       // Given
-      const expected = Timeout;
       const promise = sleep(16);
 
       // When
@@ -87,16 +81,16 @@ describe("utils", () => {
 
       // Then
       clock.tick(16100);
-      assert.equal(await actual, expected);
+      expect(await actual).toBe(Timeout);
     });
 
-    after(() => {
+    afterEach(() => {
       clock.restore();
     });
   });
 
   describe("range", () => {
-    it("should return numbers", () => {
+    test("should return numbers", () => {
       // Given
       const expected = [0, 1, 2, 3];
 
@@ -104,10 +98,10 @@ describe("utils", () => {
       const actual = range(4);
 
       // Then
-      assert.deepEqual(actual, expected);
+      expect(actual).toEqual(expected);
     });
 
-    it("should return empty on 0", () => {
+    test("should return empty on 0", () => {
       // Given
       const expected = [] as number[];
 
@@ -115,10 +109,10 @@ describe("utils", () => {
       const actual = range(0);
 
       // Then
-      assert.deepEqual(actual, expected);
+      expect(actual).toEqual(expected);
     });
 
-    it("should return empty on negative", () => {
+    test("should return empty on negative", () => {
       // Given
       const expected = [] as number[];
 
@@ -126,12 +120,12 @@ describe("utils", () => {
       const actual = range(-4);
 
       // Then
-      assert.deepEqual(actual, expected);
+      expect(actual).toEqual(expected);
     });
   });
 
   describe("combine", () => {
-    it("should return expected", () => {
+    test("should return expected", () => {
       // Given
       const arrays = [
         ["a", "b"],
@@ -155,7 +149,7 @@ describe("utils", () => {
 
       // Then
       // Compare sorted, since order doesn't matter
-      assert.deepEqual(actual.sort(), expected.sort());
+      expect(actual.sort()).toEqual(expected.sort());
     });
   });
 
@@ -171,11 +165,11 @@ describe("utils", () => {
       [128 * Math.pow(1024, 7), "128Zb"],
       [128 * Math.pow(1024, 8), "128Yb"],
       [8 * Math.pow(1024, 9), "8192Yb"],
-    ] as Array<[number, string]>;
+    ] as [number, string][];
 
     cases.forEach(([input, expected]) =>
-      it(`should format ${expected}`, () =>
-        assert.equal(formatByteSize(input), expected)),
+      test(`should format ${expected}`, () =>
+        expect(formatByteSize(input)).toBe(expected)),
     );
   });
 
@@ -191,11 +185,11 @@ describe("utils", () => {
       [128 * Math.pow(1024, 7), "128Zbps"],
       [128 * Math.pow(1024, 8), "128Ybps"],
       [8 * Math.pow(1024, 9), "8192Ybps"],
-    ] as Array<[number, string]>;
+    ] as [number, string][];
 
     cases.forEach(([input, expected]) =>
-      it(`should format ${expected}`, () =>
-        assert.equal(formatBandwidth(input), expected)),
+      test(`should format ${expected}`, () =>
+        expect(formatBandwidth(input)).toBe(expected)),
     );
   });
 
@@ -211,11 +205,11 @@ describe("utils", () => {
       [1814400, "3wk"],
       [10368000, "4mo"],
       [378432000, "12yr"],
-    ] as Array<[number, string]>;
+    ] as [number, string][];
 
     cases.forEach(([input, expected]) =>
-      it(`should format ${expected}`, () =>
-        assert.equal(formatDuration(input), expected)),
+      test(`should format ${expected}`, () =>
+        expect(formatDuration(input)).toBe(expected)),
     );
   });
 });
