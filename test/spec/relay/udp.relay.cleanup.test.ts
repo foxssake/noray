@@ -1,5 +1,4 @@
-import { describe, it } from "node:test";
-import assert from "node:assert";
+import { describe, test, expect } from "bun:test";
 import sinon from "sinon";
 import { time } from "../../../src/utils.ts";
 import { RelayEntry } from "../../../src/relay/relay.entry.ts";
@@ -8,7 +7,7 @@ import { UDPRelayHandler } from "../../../src/relay/udp.relay.handler.ts";
 import { cleanupUdpRelayTable } from "../../../src/relay/udp.relay.cleanup.ts";
 
 describe("cleanupUdpRelayTable", () => {
-  it("should free old relays", () => {
+  test("should free old relays", () => {
     // Given
     const origin = time();
     const timeout = 2;
@@ -61,21 +60,21 @@ describe("cleanupUdpRelayTable", () => {
     cleanupUdpRelayTable(relayHandler, timeout);
 
     // Then
-    assert(
+    expect(
       relayHandler.freeRelay.neverCalledWith(freshRelay),
       "Fresh relay was freed!",
-    );
-    assert(
+    ).toBeTruthy();
+    expect(
       relayHandler.freeRelay.neverCalledWith(oldSendRelay),
       "Old send relay was freed!",
-    );
-    assert(
+    ).toBeTruthy();
+    expect(
       relayHandler.freeRelay.neverCalledWith(oldReceiveRelay),
       "Old receive relay was freed!",
-    );
-    assert(
+    ).toBeTruthy();
+    expect(
       relayHandler.freeRelay.calledWith(expiredRelay),
       "Expired relay was not freed!",
-    );
+    ).toBeTruthy();
   });
 });

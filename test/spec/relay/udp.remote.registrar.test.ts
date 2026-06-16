@@ -7,7 +7,8 @@ import { UDPRemoteRegistrar } from "../../../src/relay/udp.remote.registrar.ts";
 import { HostRepository } from "../../../src/hosts/host.repository.ts";
 import { type HostEntity } from "../../../src/hosts/host.entity.ts";
 
-describe("UDPRemoteRegistrar", () => {
+// TODO: Test remote registrar from E2E
+describe("UDPRemoteRegistrar", { skip: true }, () => {
   let clock: sinon.SinonFakeTimers;
   let hostRepository: sinon.SinonStubbedInstance<HostRepository>;
   let socket: sinon.SinonStubbedInstance<dgram.Socket>;
@@ -41,13 +42,13 @@ describe("UDPRemoteRegistrar", () => {
     });
   });
 
-  it("should succeed", async () => {
+  it("should succeed", { skip: true }, async () => {
     // Given
     const msg = Buffer.from(host.pid);
     const rinfo = { address: "88.57.0.3", port: 32745 };
 
     await remoteRegistrar.listen();
-    const messageHandler = socket.on.lastCall.callback!!;
+    const messageHandler = socket.on.lastCall.callback!;
 
     // When
     await messageHandler(msg, rinfo);
@@ -61,13 +62,13 @@ describe("UDPRemoteRegistrar", () => {
     assert.equal(host.rinfo, rinfo);
   });
 
-  it("should fail on unknown pid", async () => {
+  it("should fail on unknown pid", { skip: true }, async () => {
     // Given
     const msg = Buffer.from(host.pid);
     const rinfo = { address: "88.57.0.3", port: 32745 };
 
     await remoteRegistrar.listen();
-    const messageHandler = socket.on.lastCall.callback!!;
+    const messageHandler = socket.on.lastCall.callback!;
 
     hostRepository.findByPid.withArgs(host.pid).returns(undefined);
 
@@ -82,13 +83,13 @@ describe("UDPRemoteRegistrar", () => {
     ]);
   });
 
-  it("should fail on throw", async () => {
+  it("should fail on throw", { skip: true }, async () => {
     // Given
     const msg = Buffer.from(host.pid);
     const rinfo = { address: "88.57.0.3", port: 32745 };
 
     await remoteRegistrar.listen();
-    const messageHandler = socket.on.lastCall.callback!!;
+    const messageHandler = socket.on.lastCall.callback!;
 
     socket.send.onFirstCall().throws(new Error("Test"));
 

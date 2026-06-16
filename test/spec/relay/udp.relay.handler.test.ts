@@ -7,6 +7,9 @@ import { RelayEntry } from "../../../src/relay/relay.entry.ts";
 import { NetAddress } from "../../../src/relay/net.address.ts";
 import { UDPRelayHandler } from "../../../src/relay/udp.relay.handler.ts";
 
+// TODO: Refactor the relay, so it only decides what and where to send, without
+// actually sending it
+
 describe("UDPRelayHandler", () => {
   describe("createRelay", () => {
     it("should create relay", async () => {
