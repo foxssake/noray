@@ -1,9 +1,9 @@
 import { HostRepository } from "../hosts/host.repository.ts";
-import assert from "node:assert";
 import logger from "../logger.ts";
 import * as prometheus from "prom-client";
 import { metricsRegistry } from "../metrics/metrics.registry.ts";
 import { UDPSocket } from "./udp.socket.pool.ts";
+import { assert } from "../assert.ts";
 
 const log = logger.child({ name: "UDPRemoteRegistrar" });
 
@@ -92,19 +92,15 @@ export class UDPRemoteRegistrar {
       const host = this.hostRepository.findByPid(pid);
       assert(host, "Unknown host pid!");
 
-      if (host.rinfo) {
+      if (host.remoteAddress) {
         // Host has already remote info registered
         this.socket.send("OK", incomingPort, incomingAddress);
         registerRepatCounter.inc();
         return;
       }
 
-      host.rinfo = {
-        address: incomingAddress,
-        port: incomingPort,
-        family: "IPv4",
-        size: 16,
-      };
+      host.remoteAddress = incomingAddress;
+      host.remotePort = incomingPort;
       this.socket.send("OK", incomingPort, incomingAddress);
       registerSuccessCounter.inc();
     } catch (e) {

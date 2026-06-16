@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import { assert } from "../assert";
 
 export type UDPSocket = Bun.udp.Socket<"buffer">;
 export type UDPSocketOptions = Bun.udp.SocketOptions<"buffer">;

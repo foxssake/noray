@@ -1,6 +1,6 @@
 import * as rl from "node:readline/promises";
 import * as chp from "node:child_process";
-import { fail } from "node:assert";
+import { fail } from "../src/assert";
 
 function sleep(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));

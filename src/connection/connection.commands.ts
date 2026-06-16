@@ -1,11 +1,11 @@
 import { HostRepository } from "../hosts/host.repository.ts";
-import assert from "node:assert";
 import logger from "../logger.ts";
 import { udpRelayHandler } from "../relay/relay.ts";
 import { RelayEntry } from "../relay/relay.entry.ts";
 import { NetAddress } from "../relay/net.address.ts";
 import { NorayReactor } from "../noray.ts";
 import { HostEntity } from "../hosts/host.entity.ts";
+import { assert } from "../assert.ts";
 
 export function handleConnect(hostRepository: HostRepository) {
   return function(server: NorayReactor) {
