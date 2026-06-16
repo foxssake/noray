@@ -1,4 +1,3 @@
-import * as dgram from "node:dgram";
 import * as nanoid from "nanoid";
 import { config } from "../config.ts";
 import { generateWordId } from "../utils.ts";
@@ -38,9 +37,18 @@ export interface HostEntity {
   relay: number | undefined;
 
   /**
-   * Host remote info.
+   * Host's address open for UDP.
+   *
+   * This is the public address where the host receives UDP traffic.
    */
-  rinfo: dgram.RemoteInfo | undefined;
+  remoteAddress: string | undefined;
+
+  /**
+   * Host's port open for UDP.
+   *
+   * This is the public port where the host receives UDP traffic.
+   */
+  remotePort: number | undefined;
 }
 
 export function makeHost(socket: Bun.Socket): HostEntity {
@@ -50,6 +58,7 @@ export function makeHost(socket: Bun.Socket): HostEntity {
     pid: generatePID(),
 
     relay: undefined,
-    rinfo: undefined,
+    remoteAddress: undefined,
+    remotePort: undefined,
   };
 }

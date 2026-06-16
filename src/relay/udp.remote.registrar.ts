@@ -1,9 +1,9 @@
 import { HostRepository } from "../hosts/host.repository.ts";
-import dgram from "node:dgram";
 import assert from "node:assert";
 import logger from "../logger.ts";
 import * as prometheus from "prom-client";
 import { metricsRegistry } from "../metrics/metrics.registry.ts";
+import { UDPSocket } from "./udp.socket.pool.ts";
 
 const log = logger.child({ name: "UDPRemoteRegistrar" });
 
@@ -27,7 +27,7 @@ const registerRepatCounter = new prometheus.Counter({
 
 export interface UDPRemoteRegistrarOptions {
   hostRepository: HostRepository;
-  socket?: dgram.Socket;
+  socket?: UDPSocket;
 }
 
 /**
@@ -45,51 +45,72 @@ export class UDPRemoteRegistrar {
   /**
    * Socket listening for requests.
    */
-  public readonly socket: dgram.Socket;
+  public readonly socket: UDPSocket | undefined;
 
   private hostRepository: HostRepository;
 
   constructor(options: UDPRemoteRegistrarOptions) {
     this.hostRepository = options.hostRepository;
-    this.socket = options.socket ?? dgram.createSocket("udp4");
+    this.socket = options.socket;
   }
 
   /**
    * Start listening for incoming requests.
    */
-  listen(port = 0, address = "0.0.0.0"): Promise<void> {
-    return new Promise((resolve) => {
-      this.socket.on("message", (msg, rinfo) => this.handle(msg, rinfo));
-      this.socket.bind(port, address, () => {
-        const address = this.socket.address();
-        log.info("Listening on %s:%s", address.address, address.port);
-        resolve();
-      });
+  async listen(port = 0, address = "0.0.0.0"): Promise<void> {
+    const server = await Bun.udpSocket({
+      port,
+      hostname: address,
+      socket: {
+        data: (_socket, data, port, address) => {
+          this.handle(data, address, port);
+        },
+      },
     });
+
+    log.info("Listening on %s:%s", server.address.address, server.address.port);
   }
 
-  private async handle(msg: Buffer, rinfo: dgram.RemoteInfo) {
+  private async handle(
+    msg: Buffer,
+    incomingAddress: string,
+    incomingPort: number,
+  ) {
+    if (this.socket === undefined) {
+      // Should not happen, `handle()` is only called by the listening socket
+      log.error("Trying to handle incoming request without active socket!");
+      return;
+    }
+
     try {
       const pid = msg.toString("utf8");
-      log.debug({ pid, rinfo }, "Received UDP relay request");
+      log.debug(
+        { pid, incomingAddress, incomingPort },
+        "Received UDP relay request",
+      );
 
       const host = this.hostRepository.findByPid(pid);
       assert(host, "Unknown host pid!");
 
       if (host.rinfo) {
         // Host has already remote info registered
-        this.socket.send("OK", rinfo.port, rinfo.address);
+        this.socket.send("OK", incomingPort, incomingAddress);
         registerRepatCounter.inc();
         return;
       }
 
-      host.rinfo = rinfo;
-      this.socket.send("OK", rinfo.port, rinfo.address);
+      host.rinfo = {
+        address: incomingAddress,
+        port: incomingPort,
+        family: "IPv4",
+        size: 16,
+      };
+      this.socket.send("OK", incomingPort, incomingAddress);
       registerSuccessCounter.inc();
     } catch (e) {
       registerFailCounter.inc();
       const message = e instanceof Error ? e.message : "Error";
-      this.socket.send(message, rinfo.port, rinfo.address);
+      this.socket.send(message, incomingPort, incomingAddress);
     }
   }
 }

@@ -1,5 +1,4 @@
-import dgram from "node:dgram";
-import net from "node:net";
+// TODO: Stick to interface, methods are probably only needed for data lookups
 
 export interface NetAddressData {
   address: string;
@@ -21,12 +20,5 @@ export class NetAddress implements NetAddressData {
 
   toString() {
     return `${this.address}:${this.port}`;
-  }
-
-  static fromRinfo(rinfo: dgram.RemoteInfo | net.AddressInfo): NetAddress {
-    return new NetAddress({
-      address: rinfo.address,
-      port: rinfo.port,
-    });
   }
 }

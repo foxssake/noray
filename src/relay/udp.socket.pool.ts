@@ -1,5 +1,7 @@
 import assert from "node:assert";
-import dgram from "node:dgram";
+
+export type UDPSocket = Bun.udp.Socket<"buffer">;
+export type UDPSocketOptions = Bun.udp.SocketOptions<"buffer">;
 
 /**
  * Class to manage and allocate UDP ports as needed.
@@ -16,7 +18,7 @@ export class UDPSocketPool {
    * Port to socket
    * @type {Map<number, dgram.Socket>}
    */
-  private sockets = new Map<number, dgram.Socket>();
+  private sockets = new Map<number, UDPSocket>();
 
   /**
    * Free ports
@@ -32,15 +34,12 @@ export class UDPSocketPool {
    * @returns Allocated port
    * @throws if allocation fails
    */
-  allocatePort(port = 0): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const socket = dgram.createSocket("udp4");
-      socket.once("error", reject);
-      socket.bind(port ?? 0, () => {
-        port = this.addSocket(socket);
-        resolve(port);
-      });
-    });
+  async allocatePort(
+    port?: number,
+    options: UDPSocketOptions = {},
+  ): Promise<number> {
+    const socket = await Bun.udpSocket({ ...options, port });
+    return this.addSocket(socket);
   }
 
   /**
@@ -59,7 +58,7 @@ export class UDPSocketPool {
    * Get socket listening on port.
    * @param port Port
    */
-  getSocket(port: number): dgram.Socket | undefined {
+  getSocket(port: number): UDPSocket | undefined {
     return this.sockets.get(port);
   }
 
@@ -68,8 +67,8 @@ export class UDPSocketPool {
    * @param socket Socket
    * @returns Relay port
    */
-  addSocket(socket: dgram.Socket): number {
-    const port = socket.address().port;
+  addSocket(socket: UDPSocket): number {
+    const port = socket.port;
     this.sockets.set(port, socket);
     this.freePorts.push(port);
 

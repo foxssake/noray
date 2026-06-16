@@ -4,6 +4,7 @@ import logger from "../logger.ts";
 import * as prometheus from "prom-client";
 import { metricsRegistry } from "../metrics/metrics.registry.ts";
 import { NorayReactor } from "../noray.ts";
+import { NorayEvents } from "../events.ts";
 
 const activeHostsGauge = new prometheus.Gauge({
   name: "noray_active_hosts",
@@ -31,8 +32,10 @@ export function handleRegisterHost(hostRepository: HostRepository) {
         socket.remotePort,
       );
 
-      // TODO: Create global message bus that modules can subscribe to
-      socket.on("close", () => {
+      // TODO: Manage this via repo in `host.ts` or smth
+      NorayEvents.on("connection-close", (closed) => {
+        if (closed !== socket) return;
+
         log.info(
           { oid: host.oid, pid: host.pid },
           "Host disconnected, removing from repository",
