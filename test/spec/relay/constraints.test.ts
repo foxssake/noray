@@ -1,5 +1,4 @@
-import { describe, it } from "node:test";
-import assert from "node:assert";
+import { describe, test, expect } from "bun:test";
 import sinon from "sinon";
 import { RelayEntry } from "../../../src/relay/relay.entry.ts";
 import { NetAddress } from "../../../src/relay/net.address.ts";
@@ -14,7 +13,7 @@ import {
 
 describe("Relay constraints", () => {
   describe("constrainIndividualBandwidth", () => {
-    it("should pass", () => {
+    test("should pass", () => {
       // Given
       const relayTable = [
         new RelayEntry({
@@ -37,12 +36,12 @@ describe("Relay constraints", () => {
       constrainIndividualBandwidth(relayHandler, 16);
 
       // When + Then
-      assert.doesNotThrow(() =>
+      expect(() =>
         relayHandler.emit("transmit", relayTable[0], relayTable[1], message),
-      );
+      ).not.toThrow();
     });
 
-    it("should throw on too much data", () => {
+    test("should throw on too much data", () => {
       // Given
       const relayTable = [
         new RelayEntry({
@@ -65,14 +64,14 @@ describe("Relay constraints", () => {
       constrainIndividualBandwidth(relayHandler, 16);
 
       // When + Then
-      assert.throws(() =>
+      expect(() =>
         relayHandler.emit("transmit", relayTable[0], relayTable[1], message),
-      );
+      ).toThrow();
     });
   });
 
   describe("constrainGlobalBandwidth", () => {
-    it("should pass", () => {
+    test("should pass", () => {
       // Given
       const relayTable = [
         new RelayEntry({
@@ -95,15 +94,15 @@ describe("Relay constraints", () => {
       constrainGlobalBandwidth(relayHandler, 16);
 
       // When + Then
-      assert.doesNotThrow(() =>
+      expect(() =>
         relayHandler.emit("transmit", relayTable[0], relayTable[1], message),
-      );
-      assert.doesNotThrow(() =>
+      ).not.toThrow();
+      expect(() =>
         relayHandler.emit("transmit", relayTable[1], relayTable[0], message),
-      );
+      ).not.toThrow();
     });
 
-    it("should throw", () => {
+    test("should throw", () => {
       // Given
       const relayTable = [
         new RelayEntry({
@@ -126,17 +125,17 @@ describe("Relay constraints", () => {
       constrainGlobalBandwidth(relayHandler, 16);
 
       // When + Then
-      assert.doesNotThrow(() =>
+      expect(() =>
         relayHandler.emit("transmit", relayTable[0], relayTable[1], message),
-      );
-      assert.throws(() =>
+      ).not.toThrow();
+      expect(() =>
         relayHandler.emit("transmit", relayTable[1], relayTable[0], message),
-      );
+      ).toThrow();
     });
   });
 
   describe("constrainLifetime", () => {
-    it("should pass", () => {
+    test("should pass", () => {
       // Given
       const relayTable = [
         new RelayEntry({
@@ -160,12 +159,12 @@ describe("Relay constraints", () => {
       constrainLifetime(relayHandler, 4);
 
       // When + Then
-      assert.doesNotThrow(() =>
+      expect(() =>
         relayHandler.emit("transmit", relayTable[0], relayTable[1], message),
-      );
+      ).not.toThrow();
     });
 
-    it("should throw", () => {
+    test("should throw", () => {
       // Given
       const relayTable = [
         new RelayEntry({
@@ -189,14 +188,14 @@ describe("Relay constraints", () => {
       constrainLifetime(relayHandler, 4);
 
       // When + Then
-      assert.throws(() =>
+      expect(() =>
         relayHandler.emit("transmit", relayTable[0], relayTable[1], message),
-      );
+      ).toThrow();
     });
   });
 
   describe("constrainTraffic", () => {
-    it("should pass", () => {
+    test("should pass", () => {
       // Given
       const relayTable = [
         new RelayEntry({
@@ -219,15 +218,15 @@ describe("Relay constraints", () => {
       constrainTraffic(relayHandler, 16);
 
       // When + Then
-      assert.doesNotThrow(() =>
+      expect(() =>
         relayHandler.emit("transmit", relayTable[0], relayTable[1], message),
-      );
-      assert.doesNotThrow(() =>
+      ).not.toThrow();
+      expect(() =>
         relayHandler.emit("transmit", relayTable[1], relayTable[0], message),
-      );
+      ).not.toThrow();
     });
 
-    it("should throw", () => {
+    test("should throw", () => {
       // Given
       const relayTable = [
         new RelayEntry({
@@ -250,15 +249,15 @@ describe("Relay constraints", () => {
       constrainTraffic(relayHandler, 16);
 
       // When + Then
-      assert.doesNotThrow(() =>
+      expect(() =>
         relayHandler.emit("transmit", relayTable[0], relayTable[1], message),
-      );
-      assert.doesNotThrow(() =>
+      ).not.toThrow();
+      expect(() =>
         relayHandler.emit("transmit", relayTable[1], relayTable[0], message),
-      );
-      assert.throws(() =>
+      ).not.toThrow();
+      expect(() =>
         relayHandler.emit("transmit", relayTable[1], relayTable[0], message),
-      );
+      ).toThrow();
     });
   });
 });

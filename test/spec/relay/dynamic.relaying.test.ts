@@ -1,5 +1,4 @@
-import { beforeEach, afterEach, describe, it } from "node:test";
-import assert from "node:assert";
+import { beforeEach, afterEach, describe, test, expect } from "bun:test";
 import sinon from "sinon";
 import { UDPRelayHandler } from "../../../src/relay/udp.relay.handler.ts";
 import { sleep } from "../../../src/utils.ts";
@@ -15,7 +14,7 @@ describe("DynamicRelaying", () => {
     clock = sinon.useFakeTimers();
   });
 
-  it("should create relay", async () => {
+  test("should create relay", async () => {
     // Given
     const socketPool = sinon.createStubInstance(UDPSocketPool);
     socketPool.getPort.returns(10000);
@@ -59,22 +58,22 @@ describe("DynamicRelaying", () => {
 
     // Then
     const createdRelay = relayHandler.createRelay.lastCall.args[0];
-    assert(createdRelay, "Relay was not created!");
-    assert.equal(createdRelay.address, senderAddress);
-    assert.equal(createdRelay.port, 10000);
+    expect(createdRelay, "Relay was not created!").not.toBeNil();
+    expect(createdRelay.address).toBe(senderAddress);
+    expect(createdRelay.port).toBe(10000);
 
     const sent = relayHandler.relay
       .getCalls()
       .map((call) => call.args[0]?.toString());
     messages.forEach((message) =>
-      assert(
+      expect(
         sent.includes(message.toString()),
         `Message "${message.toString()}" was not sent!`,
-      ),
+      ).toBeTrue(),
     );
   });
 
-  it("should ignore known sender", async () => {
+  test("should ignore known sender", async () => {
     // Given
     const relayHandler = sinon.createStubInstance(UDPRelayHandler);
     relayHandler.on.callThrough();
@@ -110,11 +109,11 @@ describe("DynamicRelaying", () => {
     // clock = sinon.useFakeTimers();
 
     // Then
-    assert(relayHandler.createRelay.notCalled);
-    assert(relayHandler.relay.notCalled);
+    expect(relayHandler.createRelay.notCalled).toBeTrue();
+    expect(relayHandler.relay.notCalled).toBeTrue();
   });
 
-  it("should ignore unknown target", async () => {
+  test("should ignore unknown target", async () => {
     // Given
     const relayHandler = sinon.createStubInstance(UDPRelayHandler);
     relayHandler.on.callThrough();
@@ -149,8 +148,8 @@ describe("DynamicRelaying", () => {
     // clock = sinon.useFakeTimers();
 
     // Then
-    assert(relayHandler.createRelay.notCalled);
-    assert(relayHandler.relay.notCalled);
+    expect(relayHandler.createRelay.notCalled).toBeTrue();
+    expect(relayHandler.relay.notCalled).toBeTrue();
   });
 
   afterEach(() => {
