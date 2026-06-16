@@ -98,7 +98,7 @@ Noray.hook(async (noray) => {
     try {
       // HACK: Removing the try-catch guard results in a "not running" exception?
       // On node v24.16.0
-      udpRemoteRegistrar.socket.close();
+      udpRemoteRegistrar.socket?.close();
     } catch (e) {
       log.warn(e, "Failed to close UDP Remote Registrar socket");
     }

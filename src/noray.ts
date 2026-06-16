@@ -81,6 +81,8 @@ export class Noray extends EventEmitter {
 
     this.emit("close");
     this.server.stop(true);
+
+    this.log.info("Shutdown complete");
   }
 
   get reactor() {
