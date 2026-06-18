@@ -9,8 +9,8 @@
 	},
 	"scripts": {
 		"lint": "eslint src bin",
-		"test": "node --test test/spec/**/*.test.ts",
-		"test:e2e": "node --test test/e2e/**/*.test.ts | node scripts/taplog.ts utap \"pino-pretty -c\"",
+		"test:spec": "bun test test/spec",
+		"test:e2e": "bun test test/e2e | bun scripts/taplog.ts utap \"pino-pretty -c\"",
 		"start": "bun bin/noray.ts | pino-pretty",
 		"start:prod": "NODE_ENV=production bun bin/noray.ts"
 	},
@@ -21,7 +21,7 @@
 		"relay",
 		"nat"
 	],
-	"author": "Tamas Galffy",
+	"author": "Tamás Gálffy",
 	"license": "MIT",
 	"repository": "github:foxssake/noray",
 	"homepage": "https://github.com/foxssake/noray",

@@ -59,6 +59,7 @@ Noray.hook(async (noray) => {
       log.warn({ err }, "Failed to bind port %d, ignoring", port);
     }
   }
+  log.info("Finished binding ports!");
 
   log.info(
     "Limiting relay bandwidth to %s/s and global bandwidth to %s/s",

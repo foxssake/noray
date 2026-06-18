@@ -1,16 +1,15 @@
-import { describe, it, before, after } from "node:test";
-import assert from "node:assert";
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { End2EndContext } from "./context.ts";
 
 describe("Hosts", () => {
   const context = new End2EndContext();
 
-  before(async () => {
+  beforeAll(async () => {
     await context.startup();
   });
 
   describe("register", () => {
-    it("should respond with oid/pid", async () => {
+    test("should respond with oid/pid", async () => {
       const client = await context.connect();
 
       client.write("register-host\n");
@@ -19,18 +18,18 @@ describe("Hosts", () => {
       const response = await context.read(client);
 
       // Check if we got both id's
-      assert(
+      expect(
         response.find((cmd) => cmd.startsWith("set-oid")),
         "Missing open id!",
-      );
-      assert(
+      ).not.toBeNil();
+      expect(
         response.find((cmd) => cmd.startsWith("set-pid")),
         "Missing private id!",
-      );
+      ).not.toBeNil();
     });
   });
 
-  after(() => {
+  afterAll(() => {
     context.shutdown();
   });
 });

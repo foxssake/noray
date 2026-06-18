@@ -1,52 +1,53 @@
-import { describe, it, before, after } from "node:test";
-import assert from "node:assert";
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { End2EndContext } from "./context.ts";
+import { sleep } from "../../src/utils.ts";
 
 describe("Connection", () => {
   const context = new End2EndContext();
 
-  before(async () => {
+  beforeAll(async () => {
     await context.startup();
   });
 
   describe("connect", () => {
-    it("should respond with external address", async () => {
+    test("should respond with external address", async () => {
       const host = await context.connect();
       const client = await context.connect();
 
       // Grab data from responses
       context.log.info("Registering parties");
       const [oid, pid] = await context.registerHost(host);
-      const [_, clientPid] = await context.registerHost(client);
+      const clientPid = (await context.registerHost(client))[1];
 
-      assert(oid, "No oid received!");
-      assert(pid, "No pid received!");
-      assert(clientPid, "No client pid received!");
+      expect(oid, "No oid received!").not.toBeNil();
+      expect(pid, "No pid received!").not.toBeNil();
+      expect(clientPid, "No client pid received!").not.toBeNil();
 
       // Register external addresses
       context.log.info("Registering external addresses");
       await Promise.all([
-        context.registerExternal(undefined, pid),
-        context.registerExternal(undefined, clientPid),
+        context.registerExternal(pid),
+        context.registerExternal(clientPid),
       ]);
 
       // Send connect request
       client.write(`connect ${oid}\n`);
+      await sleep(0.1);
 
       // Assert responses
-      assert(
+      expect(
         (await context.read(client)).find((cmd) => cmd.startsWith("connect ")),
         "No handshake received by client!",
-      );
+      ).not.toBeNil();
 
-      assert(
+      expect(
         (await context.read(host)).find((cmd) => cmd.startsWith("connect ")),
         "No handshake received by host!",
-      );
+      ).not.toBeNil();
     });
   });
 
-  after(() => {
+  afterAll(() => {
     context.shutdown();
   });
 });

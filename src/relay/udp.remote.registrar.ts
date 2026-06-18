@@ -45,7 +45,7 @@ export class UDPRemoteRegistrar {
   /**
    * Socket listening for requests.
    */
-  public readonly socket: UDPSocket | undefined;
+  public socket: UDPSocket | undefined;
 
   private hostRepository: HostRepository;
 
@@ -69,6 +69,7 @@ export class UDPRemoteRegistrar {
     });
 
     log.info("Listening on %s:%s", server.address.address, server.address.port);
+    this.socket = server;
   }
 
   private async handle(
@@ -90,7 +91,7 @@ export class UDPRemoteRegistrar {
       );
 
       const host = this.hostRepository.findByPid(pid);
-      assert(host, "Unknown host pid!");
+      assert(host, `Unknown host pid: "${pid}"`);
 
       if (host.remoteAddress) {
         // Host has already remote info registered

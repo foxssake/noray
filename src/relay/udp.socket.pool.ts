@@ -82,7 +82,10 @@ export class UDPSocketPool {
    * @throws if no free ports are available
    */
   getPort(): number {
-    assert(this.freePorts.length > 0, "No more free ports!");
+    assert(
+      this.freePorts.length > 0,
+      `No more free ports! (${this.freePorts.length} / ${this.sockets.size})`,
+    );
     return this.freePorts.pop()!;
   }
 
