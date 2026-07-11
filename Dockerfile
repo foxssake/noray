@@ -1,4 +1,4 @@
-FROM ghcr.io/pnpm/pnpm:11
+FROM oven/bun:1
 
 # UDP host for remote address registration
 EXPOSE 8809/udp
@@ -7,8 +7,11 @@ EXPOSE 8890/tcp
 # HTTP host for Prometheus metrics
 EXPOSE 8891/tcp
 
-COPY . /foxssake/noray
 WORKDIR /foxssake/noray
-RUN pnpm install --frozen-lockfile
+COPY bin bin
+COPY src src
+COPY package.json bun.lock ./
 
-CMD ["pnpm", "start:prod"]
+RUN bun install --frozen-lockfile --production
+
+CMD ["bun", "start:prod"]
