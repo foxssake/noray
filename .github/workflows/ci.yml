@@ -13,33 +13,27 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup
-      uses: ./.github/actions/setup.node
+    - uses: actions/checkout@v7
+    - uses: oven-sh/setup-bun@v2
+    - run: bun install
     - name: Lint
-      run: pnpm lint
+      run: bun lint
   test:
     runs-on: ubuntu-latest
     needs: lint
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup
-      uses: ./.github/actions/setup.node
-    - name: Env info
-      run: |
-        echo "Node $(node -v)"
-        echo "pnpm v$(pnpm -v)"
+    - uses: actions/checkout@v7
+    - uses: oven-sh/setup-bun@v2
+    - run: bun install
     - name: Test
-      run: pnpm test
+      run: bun test:spec
   e2e:
     runs-on: ubuntu-latest
     needs: test
     if: false # Disabled until morale improves
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup
-      uses: ./.github/actions/setup.node
-    - name: Environment
-      run: echo $CI && env
+    - uses: actions/checkout@v7
+    - uses: oven-sh/setup-bun@v2
+    - run: bun install
     - name: End to end tests
-      run: pnpm test:e2e
+      run: bun test:e2e

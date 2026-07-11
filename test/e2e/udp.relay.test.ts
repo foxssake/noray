@@ -1,13 +1,11 @@
 import { describe, it, afterAll, beforeAll } from "bun:test";
 import assert from "node:assert";
 import { End2EndContext } from "./context.ts";
-import dgram from "node:dgram";
-import { UDPRelayHandler } from "../../src/relay/udp.relay.handler.ts";
 import { RelayEntry } from "../../src/relay/relay.entry.ts";
 import { NetAddress } from "../../src/relay/net.address.ts";
 import { sleep } from "../../src/utils.ts";
-import { UDPSocket, UDPSocketPool } from "../../src/relay/udp.socket.pool.ts";
-import { udpRelayHandler, udpSocketPool } from "../../src/relay/relay.ts";
+import { UDPSocket } from "../../src/relay/udp.socket.pool.ts";
+import { udpRelayHandler } from "../../src/relay/relay.ts";
 
 class ClientUDPSocket {
   static async create(): Promise<ClientUDPSocket> {
@@ -108,13 +106,3 @@ describe("UDP Relay", async () => {
     context.shutdown();
   });
 });
-
-/**
- * Bind socket but with promise.
- */
-function bindSocket(socket: dgram.Socket, port?: number): Promise<void> {
-  return new Promise((resolve, reject) => {
-    socket.bind(port, "127.0.0.1", resolve);
-    socket.once("error", reject);
-  });
-}
