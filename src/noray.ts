@@ -2,6 +2,7 @@ import { EventEmitter } from "node:events";
 import logger from "./logger.ts";
 import { config } from "./config.ts";
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
+import { NorayEvents } from "./events.ts";
 
 export type NorayHook = (noray: Noray) => void;
 
@@ -68,6 +69,10 @@ export class Noray extends EventEmitter {
             },
             "Connection socket encountered an error!",
           );
+        },
+
+        close: (socket) => {
+          NorayEvents.emit("connection-close", socket);
         },
       },
     });
