@@ -1,7 +1,7 @@
 {
 	"name": "@foxssake/noray",
 	"version": "1.5.4",
-	"description": "Online multiplayer orchestrator and potential game platform",
+	"description": "Network connection orchestrator",
 	"main": "src/noray.ts",
 	"type": "module",
 	"bin": {
