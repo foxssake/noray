@@ -1,7 +1,7 @@
 import { BandwidthLimiter } from "./bandwidth.limiter.ts";
 import { UDPRelayHandler } from "./udp.relay.handler.ts";
-import assert from "node:assert";
 import { time } from "../utils.ts";
+import { assert } from "../assert.ts";
 
 /**
  * Limit the bandwidth on every relay individually.

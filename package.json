@@ -1,7 +1,7 @@
 {
 	"name": "@foxssake/noray",
-	"version": "1.5.3",
-	"description": "Online multiplayer orchestrator and potential game platform",
+	"version": "1.5.4",
+	"description": "Network connection orchestrator",
 	"main": "src/noray.ts",
 	"type": "module",
 	"bin": {
@@ -9,10 +9,10 @@
 	},
 	"scripts": {
 		"lint": "eslint src bin",
-		"test": "node --test test/spec/**/*.test.ts",
-		"test:e2e": "node --test test/e2e/**/*.test.ts | node scripts/taplog.ts utap \"pino-pretty -c\"",
-		"start": "node bin/noray.ts | pino-pretty",
-		"start:prod": "NODE_ENV=production node bin/noray.ts"
+		"test:spec": "bun test test/spec",
+		"test:e2e": "bun test test/e2e | bun scripts/taplog.ts utap \"pino-pretty -c\"",
+		"start": "bun bin/noray.ts | pino-pretty",
+		"start:prod": "NODE_ENV=production bun bin/noray.ts"
 	},
 	"keywords": [
 		"online",
@@ -21,7 +21,7 @@
 		"relay",
 		"nat"
 	],
-	"author": "Tamas Galffy",
+	"author": "Tamás Gálffy",
 	"license": "MIT",
 	"repository": "github:foxssake/noray",
 	"homepage": "https://github.com/foxssake/noray",
@@ -43,18 +43,13 @@
 	},
 	"dependencies": {
 		"@foxssake/trimsock-js": "^0.17.0",
-		"@foxssake/trimsock-node": "^0.17.0",
-		"dotenv": "^16.0.3",
+		"@foxssake/trimsock-bun": "^0.17.0",
 		"nanoid": "^4.0.1",
 		"pino": "^8.11.0",
 		"prom-client": "^14.2.0"
 	},
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": "24.x",
-			"onFail": "download"
-		}
+	"engines": {
+		"bun": ">=1.3.0"
 	},
 	"files": [
 		"src/*",

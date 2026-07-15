@@ -1,5 +1,4 @@
-import { describe, it } from "node:test";
-import assert from "node:assert";
+import { describe, test, expect } from "bun:test";
 import { RelayEntry } from "../../../src/relay/relay.entry.ts";
 import { NetAddress } from "../../../src/relay/net.address.ts";
 
@@ -54,11 +53,11 @@ describe("RelayEntry", () => {
         }),
         false,
       ],
-    ] as Array<[string, RelayEntry, RelayEntry, boolean]>;
+    ] as [string, RelayEntry, RelayEntry, boolean][];
 
     cases.forEach(([name, a, b, expected]) => {
-      it(name, () => {
-        assert.equal(a.equals(b), expected);
+      test(name, () => {
+        expect(a.equals(b)).toEqual(expected);
       });
     });
   });

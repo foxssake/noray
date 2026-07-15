@@ -1,5 +1,4 @@
-import { describe, it } from "node:test";
-import assert from "node:assert";
+import { expect, describe, test } from "bun:test";
 import {
   boolean,
   byteSize,
@@ -10,164 +9,137 @@ import {
   ports,
 } from "../../src/config.parsers.ts";
 
-interface CaseDef {
-  name: string;
-  input: string | [string | undefined, string[]] | undefined;
-  expected: any | undefined;
-}
+describe("boolean", () => {
+  const cases = [
+    ["should parse true", "true", true],
+    ["should parse false", "false", false],
+    ["should parse any word", "foo", false],
+    ["should return undefined on undefined", undefined, undefined],
+  ] as [string, string | undefined, boolean | undefined][];
 
-function Case(
-  name: string,
-  input: CaseDef["input"],
-  expected?: any | undefined,
-): CaseDef {
-  return { name, input, expected };
-}
+  cases.forEach(([name, input, expected]) =>
+    test(name, () => {
+      expect(boolean(input)).toBe(expected);
+    }),
+  );
+});
 
-const cases = {
-  boolean: {
-    method: (value) => boolean(value),
-    cases: [
-      Case("should parse true", "true", true),
-      Case("should parse false", "false", false),
-      Case("should parse any word", "foo", false),
-      Case("should return undefined on undefined", undefined, undefined),
-    ],
-  },
+describe("integer", () => {
+  const cases = [
+    ["should parse valid", "42", 42],
+    ["should return undefined on invalid", "asd", undefined],
+    ["should return undefined on empty", "", undefined],
+    ["should return undefined on undefined", undefined, undefined],
+  ] as [string, string | undefined, number | undefined][];
 
-  integer: {
-    method: (value) => integer(value),
-    cases: [
-      Case("should parse valid", "42", 42),
-      Case("should return undefined on invalid", "asd", undefined),
-      Case("should return undefined on empty", "", undefined),
-      Case("should return undefined on undefined", undefined, undefined),
-    ],
-  },
+  cases.forEach(([name, input, expected]) =>
+    test(name, () => {
+      expect(integer(input)).toBe(expected);
+    }),
+  );
+});
 
-  number: {
-    method: (value) => number(value),
-    cases: [
-      Case("should parse valid integer", "42", 42),
-      Case("should parse valid number", "420.69", 420.69),
-      Case("should return undefined on invalid", "asd", undefined),
-      Case("should return undefined on empty", "", undefined),
-      Case("should return undefined on undefined", undefined, undefined),
-    ],
-  },
+describe("number", () => {
+  const cases = [
+    ["should parse valid integer", "42", 42],
+    ["should parse valid number", "420.69", 420.69],
+    ["should return undefined on invalid", "asd", undefined],
+    ["should return undefined on empty", "", undefined],
+    ["should return undefined on undefined", undefined, undefined],
+  ] as [string, string | undefined, number | undefined][];
 
-  enumerated: {
-    method: ([value, known]) => enumerated(value, known),
-    cases: [
-      Case("should return known", ["a", ["a", "b", "c"]], "a"),
-      Case("should return undefined on unknown", ["f", ["a", "b"]], undefined),
-      Case("should return undefined on empty", ["", ["a", "b"]], undefined),
-      Case(
-        "should return undefined on undefined",
-        [undefined, ["a"]],
-        undefined,
-      ),
-    ],
-  },
-} as Record<string, { method: (arg: any) => void; cases: CaseDef[] }>;
+  cases.forEach(([name, input, expected]) =>
+    test(name, () => {
+      expect(number(input)).toBe(expected);
+    }),
+  );
+});
 
-Object.entries(cases).forEach(([name, entry]) => {
-  describe(name, () => {
-    entry.cases.forEach((kase) => {
-      it(kase.name, () => {
-        // Given
-        const expected = kase.expected;
+describe("enumerated", () => {
+  const cases = [
+    ["should return known", ["a", ["a", "b", "c"]], "a"],
+    ["should return undefined on unknown", ["f", ["a", "b"]], undefined],
+    ["should return undefined on empty", ["", ["a", "b"]], undefined],
+    ["should return undefined on undefined", [undefined, ["a"]], undefined],
+  ] as [string, [string | undefined, string[]], string | undefined][];
 
-        // When
-        const actual = entry.method(kase.input);
-
-        // Then
-        assert.deepEqual(actual, expected);
-      });
-    });
-  });
+  cases.forEach(([name, [input, known], expected]) =>
+    test(name, () => {
+      expect(enumerated(input, known)).toBe(expected);
+    }),
+  );
 });
 
 describe("byteSize", () => {
   const validCases = [
-    Case("should pass through undefined", undefined, undefined),
-    Case("should parse without postfix", "64", 64),
-    Case("should parse kb", "64kb", 64 * 1024),
-    Case("should parse Mb", "64Mb", 64 * Math.pow(1024, 2)),
-    Case("should parse Gb", "64Gb", 64 * Math.pow(1024, 3)),
-    Case("should parse Gb", "64Tb", 64 * Math.pow(1024, 4)),
-    Case("should parse Pb", "6.4Pb", 6.4 * Math.pow(1024, 5)),
-    Case("should parse Eb", "6.4Eb", 6.4 * Math.pow(1024, 6)),
-    Case("should parse Zb", "64Zb", 64 * Math.pow(1024, 7)),
-    Case("should parse Yb", "64Yb", 64 * Math.pow(1024, 8)),
-  ];
+    ["should pass through undefined", undefined, undefined],
+    ["should parse without postfix", "64", 64],
+    ["should parse kb", "64kb", 64 * 1024],
+    ["should parse Mb", "64Mb", 64 * Math.pow(1024, 2)],
+    ["should parse Gb", "64Gb", 64 * Math.pow(1024, 3)],
+    ["should parse Gb", "64Tb", 64 * Math.pow(1024, 4)],
+    ["should parse Pb", "6.4Pb", 6.4 * Math.pow(1024, 5)],
+    ["should parse Eb", "6.4Eb", 6.4 * Math.pow(1024, 6)],
+    ["should parse Zb", "64Zb", 64 * Math.pow(1024, 7)],
+    ["should parse Yb", "64Yb", 64 * Math.pow(1024, 8)],
+  ] as [string, string | undefined, number][];
 
   const throwCases = [
-    Case("should throw on invalid format", "no6"),
-    Case("should throw on invalid postfix", "64Bb"),
-  ];
+    ["should throw on invalid format", "no6"],
+    ["should throw on invalid postfix", "64Bb"],
+  ] as [string, string][];
 
-  validCases.forEach((kase) =>
-    it(kase.name, () =>
-      assert.equal(byteSize(kase.input as string | undefined), kase.expected),
-    ),
+  validCases.forEach(([name, input, expected]) =>
+    test(name, () => expect(byteSize(input)).toBe(expected)),
   );
 
-  throwCases.forEach((kase) =>
-    it(kase.name, () =>
-      assert.throws(() => byteSize(kase.input as string | undefined)),
-    ),
+  throwCases.forEach(([name, input]) =>
+    test(name, () => expect(() => byteSize(input)).toThrow()),
   );
 });
 
 describe("duration", () => {
   const validCases = [
-    Case("should pass through undefined", undefined, undefined),
-    Case("should parse without postfix", "64", 64),
-    Case("should parse usec", "64us", 0.000064),
-    Case("should parse msec", "64ms", 0.064),
-    Case("should parse sec", "64s", 64),
-    Case("should parse minute", "10m", 600),
-    Case("should parse hour", "4h", 14400),
-    Case("should parse hour", "4hr", 14400),
-    Case("should parse day", "2d", 172800),
-    Case("should parse week", "2w", 1209600),
-    Case("should parse month", "3mo", 7776000),
-    Case("should parse year", "4yr", 126144000),
-  ];
+    ["should pass through undefined", undefined, undefined],
+    ["should parse without postfix", "64", 64],
+    ["should parse usec", "64us", 0.000064],
+    ["should parse msec", "64ms", 0.064],
+    ["should parse sec", "64s", 64],
+    ["should parse minute", "10m", 600],
+    ["should parse hour", "4h", 14400],
+    ["should parse hour", "4hr", 14400],
+    ["should parse day", "2d", 172800],
+    ["should parse week", "2w", 1209600],
+    ["should parse month", "3mo", 7776000],
+    ["should parse year", "4yr", 126144000],
+  ] as [string, string | undefined, number | undefined][];
 
   const throwCases = [
-    Case("should throw on invalid format", "no6"),
-    Case("should throw on invalid postfix", "64mh"),
-  ];
+    ["should throw on invalid format", "no6"],
+    ["should throw on invalid postfix", "64mh"],
+  ] as [string, string][];
 
-  validCases.forEach((kase) =>
-    it(kase.name, () =>
-      assert.equal(duration(kase.input as string | undefined), kase.expected),
-    ),
+  validCases.forEach(([name, input, expected]) =>
+    test(name, () => expect(duration(input)).toBe(expected)),
   );
 
-  throwCases.forEach((kase) =>
-    it(kase.name, () =>
-      assert.throws(() => duration(kase.input as string | undefined)),
-    ),
+  throwCases.forEach(([name, input]) =>
+    test(name, () => expect(() => duration(input)).toThrow()),
   );
 });
 
 describe("ports", () => {
   const cases = [
-    Case("should parse literal", "1024", [1024]),
-    Case("should parse absolute", "1024-1026", [1024, 1025, 1026]),
-    Case("should parse relative", "2048+3", [2048, 2049, 2050, 2051]),
-    Case("should parse single absolute", "1024-1024", [1024]),
-    Case("should parse single relative", "1024+0", [1024]),
-    Case("should return sorted", "2048+1, 1024-1025", [1024, 1025, 2048, 2049]),
-    Case("should return unique", "1-4, 2, 2-6", [1, 2, 3, 4, 5, 6]),
-  ];
+    ["should parse literal", "1024", [1024]],
+    ["should parse absolute", "1024-1026", [1024, 1025, 1026]],
+    ["should parse relative", "2048+3", [2048, 2049, 2050, 2051]],
+    ["should parse single absolute", "1024-1024", [1024]],
+    ["should parse single relative", "1024+0", [1024]],
+    ["should return sorted", "2048+1, 1024-1025", [1024, 1025, 2048, 2049]],
+    ["should return unique", "1-4, 2, 2-6", [1, 2, 3, 4, 5, 6]],
+  ] as [string, string | undefined, number[]][];
 
-  cases.forEach((kase) =>
-    it(kase.name, () =>
-      assert.deepEqual(ports(kase.input as string | undefined), kase.expected),
-    ),
+  cases.forEach(([name, input, expected]) =>
+    test(name, () => expect(ports(input)).toEqual(expected)),
   );
 });

@@ -1,14 +1,14 @@
 import { HostRepository } from "../hosts/host.repository.ts";
-import { NodeSocketReactor } from "@foxssake/trimsock-node";
-import { type RemoteInfo } from "node:dgram";
-import assert from "node:assert";
 import logger from "../logger.ts";
 import { udpRelayHandler } from "../relay/relay.ts";
 import { RelayEntry } from "../relay/relay.entry.ts";
 import { NetAddress } from "../relay/net.address.ts";
+import { NorayReactor } from "../noray.ts";
+import { HostEntity } from "../hosts/host.entity.ts";
+import { assert } from "../assert.ts";
 
 export function handleConnect(hostRepository: HostRepository) {
-  return function(server: NodeSocketReactor) {
+  return function(server: NorayReactor) {
     server.on("connect", (command, exchange) => {
       const log = logger.child({ name: "cmd:connect" });
 
@@ -18,17 +18,19 @@ export function handleConnect(hostRepository: HostRepository) {
       const client = hostRepository.findBySocket(socket);
 
       log.debug(
-        { oid, client: socket.address() },
+        { oid, address: socket.remoteAddress, port: socket.remotePort },
         "Client attempting to connect to host",
       );
 
       assert(host, "Unknown host oid: " + oid);
-      assert(host.rinfo, "Host has no remote info registered!");
+      assert(host.remoteAddress, "Host has no remote address registered!");
+      assert(host.remotePort, "Host has no remote port registered!");
       assert(client, "Unknown client from address");
-      assert(client.rinfo, "Client has no remote info registered!");
+      assert(client.remoteAddress, "Client has no remote address registered!");
+      assert(client.remotePort, "Client has no remote port registered!");
 
-      const hostAddress = stringifyAddress(host.rinfo);
-      const clientAddress = stringifyAddress(client.rinfo);
+      const hostAddress = stringifyAddressOf(host);
+      const clientAddress = stringifyAddressOf(client);
 
       server.send(socket, { name: "connect", params: [hostAddress] });
       server.send(host.socket, { name: "connect", params: [clientAddress] });
@@ -42,7 +44,7 @@ export function handleConnect(hostRepository: HostRepository) {
 }
 
 export function handleConnectRelay(hostRepository: HostRepository) {
-  return function(server: NodeSocketReactor) {
+  return function(server: NorayReactor) {
     server.on("connect-relay", (command, exchange) => {
       const log = logger.child({ name: "cmd:connect-relay" });
 
@@ -52,15 +54,19 @@ export function handleConnectRelay(hostRepository: HostRepository) {
       const client = hostRepository.findBySocket(socket);
 
       log.debug(
-        { oid, client: `${socket.remoteAddress}:${socket.remotePort}` },
+        {
+          oid,
+          remoteAddress: socket.remoteAddress,
+          remotePort: socket.remotePort,
+        },
         "Client attempting to connect to host",
       );
       assert(host, "Unknown host oid: " + oid);
       assert(client, "Unknown client from address");
 
       log.debug("Ensuring relay for both parties");
-      host.relay = getRelay(host.rinfo!);
-      client.relay = getRelay(client.rinfo!);
+      host.relay = getRelayFor(host);
+      client.relay = getRelayFor(client);
 
       log.debug(
         { host: host.relay, client: client.relay },
@@ -86,18 +92,34 @@ export function handleConnectRelay(hostRepository: HostRepository) {
   };
 }
 
-function stringifyAddress(address: RemoteInfo) {
-  return `${address.address}:${address.port}`;
+function stringifyAddressOf(host: HostEntity) {
+  return `${host.remoteAddress}:${host.remotePort}`;
 }
 
-function getRelay(rinfo: RemoteInfo) {
+function getRelayFor(host: HostEntity) {
   // Attempt to create new relay on each connect
   // If there's a relay already, UDPRelayHandler will return that
   // If there's no relay, or it has expired, a new one will be created
   const log = logger.child({ name: "getRelay" });
-  log.trace({ rinfo }, "Ensuring relay for remote");
+  log.trace(
+    {
+      host: {
+        oid: host.oid,
+        address: host.remoteAddress,
+        port: host.remotePort,
+      },
+    },
+    "Ensuring relay for host",
+  );
+
   const relayEntry = udpRelayHandler.createRelay(
-    new RelayEntry({ address: NetAddress.fromRinfo(rinfo), port: rinfo.port }),
+    new RelayEntry({
+      address: new NetAddress({
+        address: host.remoteAddress!,
+        port: host.remotePort!,
+      }),
+      port: -1, // Set by the handler
+    }),
   );
 
   log.trace(

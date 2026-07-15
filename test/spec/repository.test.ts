@@ -1,5 +1,4 @@
-import { describe, it } from "node:test";
-import assert from "node:assert";
+import { describe, test, expect } from "bun:test";
 import {
   IdInUseError,
   Repository,
@@ -12,12 +11,12 @@ interface TestItem {
 }
 
 function makeRepository() {
-  return new Repository<TestItem, number>((it) => it.id!!);
+  return new Repository<TestItem, number>((it) => it.id!);
 }
 
 describe("Repository", () => {
   describe("add", () => {
-    it("should add item", () => {
+    test("should add item", () => {
       // Given
       const repository = makeRepository();
       const expected = { id: 0, value: "foo" } as TestItem;
@@ -26,11 +25,11 @@ describe("Repository", () => {
       const actual = repository.add(expected);
 
       // Then
-      assert.deepEqual(actual, expected);
-      assert.equal([...repository.list()].length, 1);
+      expect(actual).toEqual(expected);
+      expect([...repository.list()].length).toBe(1);
     });
 
-    it("should reject items with same id", () => {
+    test("should reject items with same id", () => {
       // Given
       const repository = makeRepository();
       const item = { id: 0, value: "foo" } as TestItem;
@@ -39,12 +38,12 @@ describe("Repository", () => {
       repository.add(item);
 
       // When + then
-      assert.throws(() => repository.add(duplicate), IdInUseError);
+      expect(() => repository.add(duplicate)).toThrow(IdInUseError);
     });
   });
 
   describe("update", () => {
-    it("should update item", () => {
+    test("should update item", () => {
       // Given
       const repository = makeRepository();
       const update = { id: 0, value: "bar" } as TestItem;
@@ -55,21 +54,21 @@ describe("Repository", () => {
 
       // Then
       const actual = repository.find(update.id);
-      assert.deepEqual(actual, update);
+      expect(actual).toEqual(update);
     });
 
-    it("should reject unknown item", () => {
+    test("should reject unknown item", () => {
       // Given
       const repository = makeRepository();
       const update = { id: 0, value: "bar" } as TestItem;
 
       // When + then
-      assert.throws(() => repository.update(update), UnknownItemError);
+      expect(() => repository.update(update)).toThrow(UnknownItemError);
     });
   });
 
   describe("find", () => {
-    it("should return known item", () => {
+    test("should return known item", () => {
       // Given
       const repository = makeRepository();
       const expected = { id: 0, value: "foo" } as TestItem;
@@ -79,10 +78,10 @@ describe("Repository", () => {
       const actual = repository.find(expected.id);
 
       // Then
-      assert.deepEqual(actual, expected);
+      expect(actual).toEqual(expected);
     });
 
-    it("should return undefined on unknown", () => {
+    test("should return undefined on unknown", () => {
       // Given
       const repository = makeRepository();
 
@@ -90,12 +89,12 @@ describe("Repository", () => {
       const actual = repository.find(0);
 
       // Then
-      assert.equal(actual, undefined);
+      expect(actual).toBe(undefined);
     });
   });
 
   describe("has", () => {
-    it("should return true on known", () => {
+    test("should return true on known", () => {
       // Given
       const repository = makeRepository();
       const item = { id: 0, value: "foo" } as TestItem;
@@ -105,10 +104,10 @@ describe("Repository", () => {
       const result = repository.has(item.id);
 
       // Then
-      assert(result);
+      expect(result).toBeTrue();
     });
 
-    it("should return false on unknown", () => {
+    test("should return false on unknown", () => {
       // Given
       const repository = makeRepository();
       const item = { id: 0, value: "foo" } as TestItem;
@@ -117,12 +116,12 @@ describe("Repository", () => {
       const result = repository.has(item.id);
 
       // Then
-      assert(!result);
+      expect(!result).toBeTrue();
     });
   });
 
   describe("list", () => {
-    it("should return empty", () => {
+    test("should return empty", () => {
       // Given
       const repository = makeRepository();
       const expected = [] as TestItem[];
@@ -131,10 +130,10 @@ describe("Repository", () => {
       const actual = [...repository.list()];
 
       // Then
-      assert.deepEqual(actual, expected);
+      expect(actual).toEqual(expected);
     });
 
-    it("should return items", () => {
+    test("should return items", () => {
       // Given
       const repository = makeRepository();
       const expected = [
@@ -147,12 +146,12 @@ describe("Repository", () => {
       const actual = [...repository.list()];
 
       // Then
-      assert.deepEqual(actual, expected);
+      expect(actual).toEqual(expected);
     });
   });
 
   describe("remove", () => {
-    it("should remove known", () => {
+    test("should remove known", () => {
       // Given
       const repository = makeRepository();
       const item = { id: 0, value: "foo" } as TestItem;
@@ -162,11 +161,11 @@ describe("Repository", () => {
       const didRemove = repository.remove(item.id);
 
       // Then
-      assert(didRemove);
-      assert.equal([...repository.list()].length, 0);
+      expect(didRemove).toBeTrue();
+      expect([...repository.list()].length).toBe(0);
     });
 
-    it("should ignore unknown", () => {
+    test("should ignore unknown", () => {
       // Given
       const repository = makeRepository();
       const item = { id: 0, value: "foo" } as TestItem;
@@ -175,12 +174,12 @@ describe("Repository", () => {
       const didRemove = repository.remove(item.id);
 
       // Then
-      assert(!didRemove);
+      expect(!didRemove).toBeTrue();
     });
   });
 
   describe("hasItem", () => {
-    it("should return true on known", () => {
+    test("should return true on known", () => {
       // Given
       const repository = makeRepository();
       const item = { id: 0, value: "foo" } as TestItem;
@@ -190,10 +189,10 @@ describe("Repository", () => {
       const result = repository.hasItem(item);
 
       // Then
-      assert(result);
+      expect(result).toBeTrue();
     });
 
-    it("should return false on unknown", () => {
+    test("should return false on unknown", () => {
       // Given
       const repository = makeRepository();
       const item = { id: 0, value: "foo" } as TestItem;
@@ -202,12 +201,12 @@ describe("Repository", () => {
       const result = repository.hasItem(item);
 
       // Then
-      assert(!result);
+      expect(!result).toBeTrue();
     });
   });
 
   describe("removeItem", () => {
-    it("should remove known", () => {
+    test("should remove known", () => {
       // Given
       const repository = makeRepository();
       const item = { id: 0, value: "foo" } as TestItem;
@@ -217,11 +216,11 @@ describe("Repository", () => {
       const didRemove = repository.removeItem(item);
 
       // Then
-      assert(didRemove);
-      assert.equal([...repository.list()].length, 0);
+      expect(didRemove).toBeTrue();
+      expect([...repository.list()].length).toBe(0);
     });
 
-    it("should ignore unknown", () => {
+    test("should ignore unknown", () => {
       // Given
       const repository = makeRepository();
       const item = { id: 0, value: "foo" } as TestItem;
@@ -230,7 +229,7 @@ describe("Repository", () => {
       const didRemove = repository.removeItem(item);
 
       // Then
-      assert(!didRemove);
+      expect(!didRemove).toBeTrue();
     });
   });
 });

@@ -67,6 +67,7 @@ export class UDPRelayHandler extends EventEmitter {
   public get relayTable(): RelayEntry[] {
     // HACK: Let's hope nobody modifies this; kinda don't want to copy it on
     // every return
+    // TODO: Maybe return an interator?
     return this._relayTable;
   }
 
@@ -84,6 +85,7 @@ export class UDPRelayHandler extends EventEmitter {
    *
    * @fires UDPRelayHandler#create
    */
+  // TODO: Passing in a full relay object is confusing, accept only the relevant settings
   createRelay(relay: RelayEntry): RelayEntry {
     log.debug({ relay }, "Creating relay");
     if (this.hasRelay(relay)) {
@@ -94,11 +96,6 @@ export class UDPRelayHandler extends EventEmitter {
 
     relay.port = this.socketPool.getPort();
     this.emit("create", relay);
-
-    const socket = this.socketPool.getSocket(relay.port)!;
-    socket.removeAllListeners("message").on("message", (msg, rinfo) => {
-      this.relay(msg, NetAddress.fromRinfo(rinfo), relay.port);
-    });
 
     relay.lastReceived = time();
     relay.created = time();

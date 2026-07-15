@@ -1,12 +1,9 @@
-import { describe, it } from "node:test";
-import assert from "node:assert";
-import dgram from "node:dgram";
-import sinon from "sinon";
+import { describe, test, expect } from "bun:test";
 import { UDPSocketPool } from "../../../src/relay/udp.socket.pool.ts";
 
 describe("UDPSocketPool", () => {
   describe("allocatePort", () => {
-    it("should allocate port", async () => {
+    test("should allocate port", async () => {
       // Given
       const pool = new UDPSocketPool();
 
@@ -19,68 +16,51 @@ describe("UDPSocketPool", () => {
   });
 
   describe("addSocket", () => {
-    it("should save port", () => {
+    test("should save port", async () => {
       // Given
-      const socket = sinon.createStubInstance(dgram.Socket);
-      socket.address.returns({
-        address: "127.0.0.1",
-        port: 10001,
-        family: "ipv4",
-      });
+      const socket = await Bun.udpSocket({});
       const pool = new UDPSocketPool();
 
       // When
       pool.addSocket(socket);
 
       // Then
-      assert.deepEqual(pool.ports, [10001]);
-      assert.equal(pool.getSocket(10001), socket);
+      expect(pool.ports).toEqual([socket.port]);
+      expect(pool.getSocket(socket.port)).toBe(socket);
     });
   });
 
   describe("deallocatePort", () => {
-    it("should call close", () => {
+    test("should call close", async () => {
       // Given
-      const socket = sinon.createStubInstance(dgram.Socket);
-      socket.address.returns({
-        address: "0.0.0.0",
-        port: 7879,
-        family: "IPv4",
-      });
-
+      const socket = await Bun.udpSocket({});
       const pool = new UDPSocketPool();
       pool.addSocket(socket);
 
       // When
-      pool.deallocatePort(7879);
+      pool.deallocatePort(socket.port);
 
       // Then
-      assert(socket.close.calledOnce);
-      assert(!pool.ports.includes(7879));
+      expect(socket.closed).toBeTrue();
+      expect(pool.ports).not.toContain(socket.port);
     });
 
-    it("should ignore unknown port", () => {
+    test("should ignore unknown port", async () => {
       // Given
-      const socket = sinon.createStubInstance(dgram.Socket);
-      socket.address.returns({
-        address: "0.0.0.0",
-        port: 7879,
-        family: "IPv4",
-      });
-
+      const socket = await Bun.udpSocket({});
       const pool = new UDPSocketPool();
       pool.addSocket(socket);
 
       // When
-      pool.deallocatePort(7876);
+      pool.deallocatePort(socket.port + 1);
 
       // Then
-      assert(socket.close.notCalled);
+      expect(socket.closed).toBeFalse();
     });
   });
 
   describe("getPort", () => {
-    it("should return allocated", async () => {
+    test("should return allocated", async () => {
       // Given
       const pool = new UDPSocketPool();
       const expected = await pool.allocatePort();
@@ -89,25 +69,25 @@ describe("UDPSocketPool", () => {
       const actual = pool.getPort();
 
       // Then
-      assert(!pool.hasFreePort());
-      assert.equal(actual, expected);
+      expect(pool.hasFreePort()).toBeFalse();
+      expect(actual).toEqual(expected);
 
       // Finally
       pool.deallocatePort(expected);
     });
 
-    it("should throw if none available", () => {
+    test("should throw if none available", () => {
       // Given
       const pool = new UDPSocketPool();
 
       // When + Then
-      assert(!pool.hasFreePort());
-      assert.throws(() => pool.getPort());
+      expect(pool.hasFreePort()).toBeFalse();
+      expect(() => pool.getPort()).toThrow();
     });
   });
 
   describe("returnPort", () => {
-    it("should make port available", async () => {
+    test("should make port available", async () => {
       // Given
       const pool = new UDPSocketPool();
       await pool.allocatePort();
@@ -117,18 +97,18 @@ describe("UDPSocketPool", () => {
       pool.returnPort(port);
 
       // Then
-      assert(pool.hasFreePort());
+      expect(pool.hasFreePort()).toBeTrue();
 
       // Finally
       pool.deallocatePort(port);
     });
 
-    it("should ignore unknown", async () => {
+    test("should ignore unknown", async () => {
       // Given
       const pool = new UDPSocketPool();
 
       // When + then
-      assert.doesNotThrow(() => pool.returnPort(65575));
+      expect(() => pool.returnPort(65575)).not.toThrow();
     });
   });
 });

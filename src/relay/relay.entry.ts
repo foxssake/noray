@@ -1,6 +1,11 @@
 import { NetAddress } from "./net.address.ts";
 import { time } from "../utils.ts";
 
+// TODO: Keep interface only
+// TODO: Update fields: `incomingPort`, `outgoingAddress`, `outgoingPort`
+// i.e. anything that arrives at `incomingPort` must be forwarded to
+// `outgoingAddress:outgoingPort`
+
 export interface RelayEntryData {
   /**
    * The port on which we've received traffic
