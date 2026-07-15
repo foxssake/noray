@@ -81,10 +81,47 @@ export class Noray extends EventEmitter {
           );
         },
 
+        connectError: (socket, error) => {
+          this.log.error(
+            {
+              error,
+              remoteAddress: socket.remoteAddress,
+              remotePort: socket.remotePort,
+            },
+            "Connection error on listen socket!",
+          );
+        },
+
+        data: (socket, data) => {
+          this.log.trace(
+            {
+              remoteAddress: socket.remoteAddress,
+              remotePort: socket.remotePort,
+              data: data.toString("utf8"),
+            },
+            "Incoming message",
+          );
+        },
+
+        end: (socket) => {
+          this.log.info(
+            {
+              remoteAddress: socket.remoteAddress,
+              remotePort: socket.remotePort,
+            },
+            "Listen socket encountered a TCP FIN packet",
+          );
+        },
+
         close: (socket) => {
           NorayEvents.emit("connection-close", socket);
         },
       },
+    });
+
+    this.reactor.use((next, command) => {
+      this.log.trace({ command }, "New exchange");
+      next();
     });
 
     this.emit("listening", config.socket.port, config.socket.host);
