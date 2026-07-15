@@ -1,8 +1,5 @@
 name: CI
 
-env:
-  node-version: 24.x
-
 on:
   push:
     branches: [ "main" ]

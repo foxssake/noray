@@ -12,7 +12,7 @@
 		"test:spec": "bun test test/spec",
 		"test:e2e": "bun test test/e2e | bun scripts/taplog.ts utap \"pino-pretty -c\"",
 		"start": "bun bin/noray.ts | pino-pretty",
-		"start:prod": "NODE_ENV=production bun bin/noray.ts"
+		"start:prod": "bun bin/noray.ts"
 	},
 	"keywords": [
 		"online",

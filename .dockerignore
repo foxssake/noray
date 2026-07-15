@@ -2,6 +2,6 @@
 test/
 .editorconfig
 .env.example
-.eslintrc.js
+eslint.config.mjs
 .jsdoc.js
 node_modules/

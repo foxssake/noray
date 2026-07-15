@@ -48,13 +48,11 @@ transmitted as-is to the appropriate player.
 
 ## Dependencies
 
-* [node](https://nodejs.org/en/download) v24.16 or newer
-  * *NOTE:* Older versions may work, but are not explicitly supported
-* [pnpm](https://pnpm.io/installation)
+* [bun](https://bun.sh/) v1.3 or newer
 
 ## Installation
 
-After cloning the repository, run `pnpm install` to install all required packages.
+After cloning the repository, run `bun install` to install all required packages.
 
 ## Configuration
 
@@ -62,7 +60,7 @@ After cloning the repository, run `pnpm install` to install all required package
 
 ## Usage
 
-To run *noray*, use `pnpm start` or `pnpm start:prod` for production use.
+To run *noray*, use `bun start` or `bun start:prod` for production use.
 
 Upon startup, the application will allocate all the configured ports and start
 listening for incoming connections. Logs are written to `stdout`.
