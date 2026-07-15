@@ -3,6 +3,7 @@ import logger from "./logger.ts";
 import { config } from "./config.ts";
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import { NorayEvents } from "./events.ts";
+import { version } from "./version.ts";
 
 export type NorayHook = (noray: Noray) => void;
 
@@ -32,7 +33,7 @@ export class Noray extends EventEmitter {
   async start(modules: string[] = defaultModules): Promise<void> {
     modules ??= defaultModules;
 
-    this.log.info("Starting Noray");
+    this.log.info("Starting Noray v" + version);
 
     this._reactor = new BunSocketReactor().onError(
       (command, exchange, error) => {
@@ -60,6 +61,15 @@ export class Noray extends EventEmitter {
       hostname: config.socket.host,
       port: config.socket.port,
       socket: {
+        open: (socket) => {
+          // Send a greeting message to new clients
+          // This also lets us know that the TCP listen socket works as intended
+          this._reactor.send(socket, {
+            name: "hi",
+            text: `noray v${version}`,
+          });
+        },
+
         error: (socket, error) => {
           this.log.error(
             {
