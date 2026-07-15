@@ -1,5 +1,5 @@
 /* eslint-disable */
-import * as net from 'node:net'
+import * as net from "node:net";
 /* eslint-enable */
 import { EventEmitter } from 'node:events'
 import logger from './logger.mjs'
@@ -26,22 +26,23 @@ export class Noray extends EventEmitter {
   #log = logger
 
   /**
-  * Register a Noray configuration hook.
-  * @param {function(Noray)} h Hook
-  */
-  static hook (h) {
+   * Register a Noray configuration hook.
+   * @param {function(Noray)} h Hook
+   */
+  static hook(h) {
     hooks.push(h)
   }
 
-  async start (modules) {
+  async start(modules) {
     modules ??= defaultModules
 
     this.#log.info('Starting Noray')
 
-    this.#reactor = new NodeSocketReactor()
-      .onError((command, exchange, error) => {
+    this.#reactor = new NodeSocketReactor().onError(
+      (command, exchange, error) => {
         exchange.failOrSend({ name: command.name, data: '' + error })
-      })
+      }
+    )
 
     // Import modules for hooks
     for (const m of modules) {
@@ -51,7 +52,7 @@ export class Noray extends EventEmitter {
 
     // Run hooks
     this.#log.info('Running %d hooks', hooks.length)
-    const hookPromises = hooks.map(h => h(this))
+    const hookPromises = hooks.map((h) => h(this))
     this.#log.info('Hooks launched')
 
     this.#log.info('Waiting for hooks to finish')
@@ -64,36 +65,46 @@ export class Noray extends EventEmitter {
     this.#server.on('listening', () => {
       this.#log.info(
         'Listening on %s:%s',
-        config.socket.host, config.socket.port
+        config.socket.host,
+        config.socket.port
       )
 
-      this.#server.on('error', err => {
+      this.#server.on('error', (err) => {
         this.#log.error('Listen socket encountered an error!')
         this.#log.error(err)
       })
 
-      this.#server.on('connection', conn => {
-        conn.on('error', err => {
+      this.#server.on('connection', (conn) => {
+        conn.on('error', (err) => {
           this.#log.error('Connection socket encountered an error!')
           this.#log.error(err)
+        })
+
+        conn.on('data', (data) => {
+          this.#log.trace(
+            {
+              address: conn.remoteAddress,
+              data: data.toString('utf8')
+            },
+            'Incoming message'
+          )
         })
       })
 
       this.emit('listening', config.socket.port, config.socket.host)
     })
-
     await promiseEvent(this, 'listening')
     this.#log.info('Started noray in %f ms', process.uptime() * 1000.0)
   }
 
-  shutdown () {
+  shutdown() {
     this.#log.info('Shutting down')
 
     this.emit('close')
     this.#server.close()
   }
 
-  get reactor () {
+  get reactor() {
     return this.#reactor
   }
 }
