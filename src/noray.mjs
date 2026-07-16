@@ -93,6 +93,15 @@ export class Noray extends EventEmitter {
 
       this.emit('listening', config.socket.port, config.socket.host)
     })
+
+    this.#reactor.use(async (next, command, xchg) => {
+      this.#log.trace(
+        { command, address: xchg.source.remoteAddress },
+        'New exchange'
+      )
+      await next()
+    })
+
     await promiseEvent(this, 'listening')
     this.#log.info('Started noray in %f ms', process.uptime() * 1000.0)
   }
