@@ -119,9 +119,28 @@ export class Noray extends EventEmitter {
       },
     });
 
-    this.reactor.use((next, command) => {
+    this.reactor.use(async (next, command) => {
       this.log.trace({ command }, "New exchange");
-      next();
+      await next();
+    });
+
+    // TODO: Why is noray shutting down on invalid ID in `connect`?
+    this.reactor.onError((cmd, xchg, err) => {
+      this.log.error(
+        { command: cmd, address: xchg.source.remoteAddress, error: err },
+        "Failed processing command",
+      );
+      if (err instanceof Error) {
+        xchg.failOrSend({
+          name: "error",
+          text: `${err.name}: ${err.message}`,
+        });
+      } else {
+        xchg.failOrSend({
+          name: "error",
+          text: "" + err,
+        });
+      }
     });
 
     this.emit("listening", config.socket.port, config.socket.host);
