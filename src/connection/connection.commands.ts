@@ -10,6 +10,10 @@ import { assert } from "../assert.ts";
 export function handleConnect(hostRepository: HostRepository) {
   return function(server: NorayReactor) {
     server.on("connect", (command, exchange) => {
+      logger.trace(
+        { command, address: exchange.source.remoteAddress },
+        "Connect command",
+      );
       const log = logger.child({ name: "cmd:connect" });
 
       const socket = exchange.source;
@@ -46,6 +50,10 @@ export function handleConnect(hostRepository: HostRepository) {
 export function handleConnectRelay(hostRepository: HostRepository) {
   return function(server: NorayReactor) {
     server.on("connect-relay", (command, exchange) => {
+      logger.trace(
+        { command, address: exchange.source.remoteAddress },
+        "Connect relay command",
+      );
       const log = logger.child({ name: "cmd:connect-relay" });
 
       const socket = exchange.source;

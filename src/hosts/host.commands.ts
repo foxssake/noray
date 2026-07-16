@@ -15,6 +15,10 @@ const activeHostsGauge = new prometheus.Gauge({
 export function handleRegisterHost(hostRepository: HostRepository) {
   return function(server: NorayReactor) {
     server.on("register-host", (__, exchange) => {
+      logger.trace(
+        { command: __, address: exchange.source.remoteAddress },
+        "Register host command",
+      );
       const log = logger.child({ name: "cmd:register-host" });
       activeHostsGauge.inc();
 
