@@ -1,3 +1,4 @@
+import logger from "../../logger.mjs";
 import { Command, type CommandDataChunk, type CommandSpec } from "./command.ts";
 import {
   ParamsConvention,
@@ -5,6 +6,8 @@ import {
   StreamConvention,
 } from "./conventions.ts";
 import { BufferOverflowError, UnexpectedCharacterError } from "./errors.ts";
+
+const log = logger.child({ name: "trimsock:reader" });
 
 /*
  * Converts the ingested data into either command lines that can be parsed, or
@@ -19,15 +22,24 @@ class CommandReader {
   private isEscape = false;
 
   ingest(data: Buffer) {
+    log.trace({ data: data.toString("utf8") }, "Ingesting data");
     const newSize = this.buffer.byteLength + data.byteLength;
     if (newSize > this.maxSize) {
       this.buffer = Buffer.of();
 
+      log.trace(
+        { data: data.toString("utf8") },
+        "Data too big for buffer, rejecting with overflow",
+      );
       throw new BufferOverflowError(
         `Buffer overflow! New size ${newSize} exceeds ${this.maxSize}!`,
       );
     }
 
+    log.trace(
+      { buffer: this.buffer.toString("utf8") },
+      "Appended ingested data to buffer",
+    );
     this.buffer = Buffer.concat([this.buffer, data]);
   }
 
@@ -257,9 +269,11 @@ export class TrimsockReader {
   read(): CommandSpec | undefined {
     let command = this.pop();
 
+    log.trace({ command }, "Applying conventions to command");
     if (command)
       for (const convention of this.conventions)
         command = convention.process(command);
+    log.trace({ command }, "Applyied conventions to command");
 
     return command;
   }
@@ -293,6 +307,7 @@ export class TrimsockReader {
       };
 
       this.queuedRawCommand = undefined;
+      log.trace({ command: result }, "Popped raw command");
       return result;
     }
 
@@ -306,6 +321,7 @@ export class TrimsockReader {
       return this.read();
     }
 
+    log.trace({ command }, "Popped command");
     return command;
   }
 }

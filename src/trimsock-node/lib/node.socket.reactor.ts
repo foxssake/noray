@@ -1,5 +1,8 @@
 import * as net from "node:net";
 import { Reactor } from "../../trimsock-js/index.ts";
+import logger from "../../logger.mjs";
+
+const log = logger.child({ name: "trimsock:node" });
 
 /**
  * Reactor adapter for [node.js' sockets].
@@ -57,9 +60,16 @@ export class NodeSocketReactor extends Reactor<net.Socket> {
   }
 
   protected write(data: string, target: net.Socket): void {
+    log.trace({ data, target: target.remoteAddress }, "Sending data");
     // TODO: Better error handling
     target.write(data, (err?) => {
       err && console.error(err);
+      if (err) {
+        log.trace(
+          { data, target: target.remoteAddress, error: err },
+          "Failed sending data",
+        );
+      }
     });
   }
 }

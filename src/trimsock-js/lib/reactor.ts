@@ -1,6 +1,9 @@
+import logger from "../../logger.mjs";
 import assert from "./assert.ts";
 import { Command, type CommandSpec } from "./command.ts";
 import { TrimsockReader } from "./reader.ts";
+
+const log = logger.child({ name: "trimsock:reactor" });
 
 /**
  * Callback type for handling incoming commands
@@ -739,6 +742,7 @@ export abstract class Reactor<T> {
    */
   public async ingest(data: Buffer | string, source: T): Promise<void> {
     try {
+      log.trace({ data: data.toString("utf8") }, "Ingesting data");
       const reader = this.ensureReaderFor(source);
 
       if (typeof data === "string") reader.ingest(Buffer.from(data, "utf8"));
@@ -748,6 +752,10 @@ export abstract class Reactor<T> {
         reader.commands().map((it) => this.handle(new Command(it), source)),
       );
     } catch (e) {
+      log.trace(
+        { data: data.toString("utf8"), error: e },
+        "Failed ingesting data",
+      );
       this.ingestErrorHandler(e, data);
     }
   }
@@ -760,6 +768,10 @@ export abstract class Reactor<T> {
    * @returns the new exchange
    */
   public send(target: T, spec: CommandSpec): Exchange<T> {
+    log.trace(
+      { command: spec, target: (target as any).remoteAddress },
+      "Sending command",
+    );
     const command = new Command(spec);
     this.write(command.serialize(), target);
     return this.ensureExchange(command, target);
@@ -779,13 +791,32 @@ export abstract class Reactor<T> {
     const exchangeId = command.id;
 
     if (this.isNewExchange(command, source)) {
+      log.trace(
+        { command, source: (source as any).remoteAddress },
+        "Received new exchange",
+      );
+
       const handler = this.handlers.get(command.name) ?? this.defaultHandler;
       const exchange = this.ensureExchange(command, source);
 
       let filterIdx = 0;
       const next = async () => {
-        if (filterIdx >= this.filters.length) await handler(command, exchange);
-        else {
+        if (filterIdx >= this.filters.length) {
+          log.trace(
+            { command, exchange: exchangeId, handler },
+            "Applying handler",
+          );
+          await handler(command, exchange);
+        } else {
+          log.trace(
+            {
+              filterIdx,
+              filter: this.filters[filterIdx],
+              command,
+              exchange: exchangeId,
+            },
+            "Applying filter",
+          );
           filterIdx += 1;
           await this.filters[filterIdx - 1](next, command, exchange);
         }
@@ -794,11 +825,20 @@ export abstract class Reactor<T> {
       try {
         await next();
       } catch (error) {
+        log.trace(
+          { command, exchange: exchangeId, error },
+          "Error occurred during command handling",
+        );
         this.errorHandler(command, exchange, error);
       }
     } else {
       const exchange =
         exchangeId !== undefined && this.exchanges.get(exchangeId, source);
+
+      log.trace(
+        { command, exchange: exchangeId, hasExchange: !!exchange },
+        "Handling known exchange",
+      );
       assert(exchange, `Unknown exchange id: ${exchangeId}!`);
       exchange.push(command);
     }
@@ -812,20 +852,25 @@ export abstract class Reactor<T> {
 
     // Request-response
     if (command.isRequest) {
+      log.trace({ command }, "Request command is missing its request id!");
       assert(hasExchangeId, "Request command is missing its request id!");
       return true;
     }
     if (command.isSuccessResponse || command.isErrorResponse) {
+      log.trace({ command }, "Response command is missing its request id!");
       assert(hasExchangeId, "Response command is missing its request id!");
       return false;
     }
 
     // Streams
     if (command.isStreamChunk) {
+      log.trace({ command }, "Stream chunk command is missing its request id!");
       assert(hasExchangeId, "Stream chunk command is missing its request id!");
       return knownExchange === undefined;
     }
     if (command.isStreamEnd) {
+      // TODO(trimsock): Wrong error message?
+      log.trace({ command }, "Stream chunk command is missing its request id!");
       assert(hasExchangeId, "Stream chunk command is missing its request id!");
       return false;
     }
