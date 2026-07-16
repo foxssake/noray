@@ -4,7 +4,7 @@ import * as net from "node:net";
 import { EventEmitter } from 'node:events'
 import logger from './logger.mjs'
 import { config } from './config.mjs'
-import { NodeSocketReactor } from '@foxssake/trimsock-node'
+import { NodeSocketReactor } from './trimsock-node/index.ts'
 import { promiseEvent } from './utils.mjs'
 
 const defaultModules = [

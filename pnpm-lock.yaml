@@ -8,12 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@foxssake/trimsock-js':
-        specifier: ^0.17.0
-        version: 0.17.0(typescript@5.9.2)
-      '@foxssake/trimsock-node':
-        specifier: ^0.17.0
-        version: 0.17.0(typescript@5.9.2)
       dotenv:
         specifier: ^16.0.3
         version: 16.5.0
@@ -94,17 +88,6 @@ packages:
   '@eslint/js@8.57.1':
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-
-  '@foxssake/trimsock-js@0.17.0':
-    resolution: {integrity: sha512-s81agKjOeUOZ/E+3SdjIntEnc7r879QbREBsVPmDvHuw2tDUdq7SsWJomNjwdFpt8Vlqj7WVTQ+pioo2T5De2A==}
-    peerDependencies:
-      typescript: ^5.0.0
-
-  '@foxssake/trimsock-node@0.17.0':
-    resolution: {integrity: sha512-28SDnnfICDCYD8ROA4PtwGwa1gc8piBxbXwl7qqOFqUwpGYpHMgMWzeYVCs1nQ4oMT66UQ4QpJMPrsSMOQTl0Q==}
-    engines: {node: '>=18.16.0'}
-    peerDependencies:
-      typescript: ^5.0.0
 
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
@@ -1334,11 +1317,6 @@ packages:
     resolution: {integrity: sha512-3KS2b+kL7fsuk/eJZ7EQdnEmQoaho/r6KUef7hxvltNA5DR8NAUM+8wJMbJyZ4G9/7i3v5zPBIMN5aybAh2/Jg==}
     engines: {node: '>= 0.4'}
 
-  typescript@5.9.2:
-    resolution: {integrity: sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-
   uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
 
@@ -1429,15 +1407,6 @@ snapshots:
       - supports-color
 
   '@eslint/js@8.57.1': {}
-
-  '@foxssake/trimsock-js@0.17.0(typescript@5.9.2)':
-    dependencies:
-      typescript: 5.9.2
-
-  '@foxssake/trimsock-node@0.17.0(typescript@5.9.2)':
-    dependencies:
-      '@foxssake/trimsock-js': 0.17.0(typescript@5.9.2)
-      typescript: 5.9.2
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
@@ -2733,8 +2702,6 @@ snapshots:
       is-typed-array: 1.1.15
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
-
-  typescript@5.9.2: {}
 
   uc.micro@2.1.0: {}
 

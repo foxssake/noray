@@ -1,6 +1,6 @@
 /* eslint-disable */
-import { HostRepository } from '../hosts/host.repository.mjs'
-import { NodeSocketReactor } from '@foxssake/trimsock-node'
+import { HostRepository } from "../hosts/host.repository.mjs";
+import { NodeSocketReactor } from "../trimsock-node/index.ts";
 /* eslint-enable */
 import assert from 'node:assert'
 import logger from '../logger.mjs'
@@ -9,13 +9,13 @@ import { RelayEntry } from '../relay/relay.entry.mjs'
 import { NetAddress } from '../relay/net.address.mjs'
 
 /**
-* @param {HostRepository} hostRepository
-*/
-export function handleConnect (hostRepository) {
+ * @param {HostRepository} hostRepository
+ */
+export function handleConnect(hostRepository) {
   /**
-  * @param {NodeSocketReactor} server
-  */
-  return function (server) {
+   * @param {NodeSocketReactor} server
+   */
+  return function(server) {
     server.on('connect', (command, exchange) => {
       const log = logger.child({ name: 'cmd:connect' })
 
@@ -49,13 +49,13 @@ export function handleConnect (hostRepository) {
 }
 
 /**
-* @param {HostRepository} hostRepository
-*/
-export function handleConnectRelay (hostRepository) {
+ * @param {HostRepository} hostRepository
+ */
+export function handleConnectRelay(hostRepository) {
   /**
-  * @param {NodeSocketReactor} server
-  */
-  return function (server) {
+   * @param {NodeSocketReactor} server
+   */
+  return function(server) {
     server.on('connect-relay', (command, exchange) => {
       const log = logger.child({ name: 'cmd:connect-relay' })
 
@@ -75,22 +75,35 @@ export function handleConnectRelay (hostRepository) {
       host.relay = getRelay(host.rinfo)
       client.relay = getRelay(client.rinfo)
 
-      log.debug({ host: host.relay, client: client.relay }, 'Replying with relay')
-      server.send(socket, { name: 'connect-relay', params: [host.relay.toString()] })
-      server.send(host.socket, { name: 'connect-relay', params: [client.relay.toString()] })
       log.debug(
-        { client: `${socket.remoteAddress}:${socket.remotePort}`, relay: host.relay, oid },
+        { host: host.relay, client: client.relay },
+        'Replying with relay'
+      )
+      server.send(socket, {
+        name: 'connect-relay',
+        params: [host.relay.toString()]
+      })
+      server.send(host.socket, {
+        name: 'connect-relay',
+        params: [client.relay.toString()]
+      })
+      log.debug(
+        {
+          client: `${socket.remoteAddress}:${socket.remotePort}`,
+          relay: host.relay,
+          oid
+        },
         'Connected client to host'
       )
     })
   }
 }
 
-function stringifyAddress (address) {
+function stringifyAddress(address) {
   return `${address.address}:${address.port}`
 }
 
-function getRelay (rinfo) {
+function getRelay(rinfo) {
   // Attempt to create new relay on each connect
   // If there's a relay already, UDPRelayHandler will return that
   // If there's no relay, or it has expired, a new one will be created
@@ -100,6 +113,10 @@ function getRelay (rinfo) {
     new RelayEntry({ address: NetAddress.fromRinfo(rinfo) })
   )
 
-  log.trace({ relayEntry }, 'Created relay, returning with port %d', relayEntry.port)
+  log.trace(
+    { relayEntry },
+    'Created relay, returning with port %d',
+    relayEntry.port
+  )
   return relayEntry.port
 }
