@@ -14,7 +14,6 @@ import { UDPRemoteRegistrar } from "./udp.remote.registrar.ts";
 import { hostRepository } from "../hosts/host.ts";
 import { useDynamicRelay } from "./dynamic.relaying.ts";
 import { UDPSocketPool } from "./udp.socket.pool.ts";
-import { NetAddress } from "./net.address.ts";
 
 export const udpSocketPool = new UDPSocketPool();
 
@@ -120,11 +119,7 @@ async function bindPortForRelaying(
   await udpSocketPool.allocatePort(port, {
     socket: {
       data(socket, data, port, address) {
-        udpRelayHandler.relay(
-          data,
-          new NetAddress({ address, port }),
-          socket.port,
-        );
+        udpRelayHandler.relayRaw(data, address, port, socket.port);
       },
       error(_socket, error) {
         log.error(error, "UDP relay socket encountered an error!");
