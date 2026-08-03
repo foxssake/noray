@@ -65,6 +65,9 @@ export class UDPRemoteRegistrar {
         data: (_socket, data, port, address) => {
           this.handle(data, address, port);
         },
+        error: (_socket, error) => {
+          log.error(error, "UDP registrar socket encountered an error!");
+        },
       },
     });
 
