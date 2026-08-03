@@ -1,6 +1,6 @@
 {
 	"name": "@foxssake/noray",
-	"version": "1.5.4",
+	"version": "1.5.5",
 	"description": "Network connection orchestrator",
 	"main": "src/noray.ts",
 	"type": "module",
