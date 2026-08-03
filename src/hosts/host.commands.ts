@@ -33,7 +33,7 @@ export function handleRegisterHost(hostRepository: HostRepository) {
       );
 
       // TODO: Manage this via repo in `host.ts` or smth
-      NorayEvents.on("connection-close", (closed) => {
+      const onConnectionClose = (closed: Bun.Socket<undefined>) => {
         if (closed !== socket) return;
 
         log.info(
@@ -42,7 +42,10 @@ export function handleRegisterHost(hostRepository: HostRepository) {
         );
         hostRepository.removeItem(host);
         activeHostsGauge.dec();
-      });
+
+        NorayEvents.off("connection-close", onConnectionClose);
+      };
+      NorayEvents.on("connection-close", onConnectionClose);
     });
   };
 }
