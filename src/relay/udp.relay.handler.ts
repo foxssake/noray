@@ -61,6 +61,35 @@ export class UDPRelayHandler extends EventEmitter {
   public socketPool: UDPSocketPool;
   private _relayTable: RelayEntry[] = [];
 
+  // Hot-path indexes: avoid O(N) linear scans in relay() on every packet.
+  // Nested map (address -> port -> entry) so the hot path can look up by the
+  // raw address string + port with no per-packet string concatenation.
+  private _byAddress = new Map<string, Map<number, RelayEntry>>();
+  private _byPort = new Map<number, RelayEntry>();
+
+  private _lookupAddr(address: string, port: number): RelayEntry | undefined {
+    return this._byAddress.get(address)?.get(port);
+  }
+
+  private _index(entry: RelayEntry): void {
+    let ports = this._byAddress.get(entry.address.address);
+    if (!ports) {
+      ports = new Map<number, RelayEntry>();
+      this._byAddress.set(entry.address.address, ports);
+    }
+    ports.set(entry.address.port, entry);
+    this._byPort.set(entry.port, entry);
+  }
+
+  private _deindex(entry: RelayEntry): void {
+    const ports = this._byAddress.get(entry.address.address);
+    if (ports) {
+      ports.delete(entry.address.port);
+      if (ports.size === 0) this._byAddress.delete(entry.address.address);
+    }
+    this._byPort.delete(entry.port);
+  }
+
   /**
    * Relay table used for relaying.
    */
@@ -91,7 +120,7 @@ export class UDPRelayHandler extends EventEmitter {
     if (this.hasRelay(relay)) {
       // We already have this relay entry
       log.trace({ relay }, "Relay already exists, ignoring");
-      return this._relayTable.find((e) => e.equals(relay))!;
+      return this._lookupAddr(relay.address.address, relay.address.port)!;
     }
 
     relay.port = this.socketPool.getPort();
@@ -100,6 +129,7 @@ export class UDPRelayHandler extends EventEmitter {
     relay.lastReceived = time();
     relay.created = time();
     this._relayTable.push(relay);
+    this._index(relay);
     log.trace({ relay }, "Relay created");
 
     activeRelayGauge.inc();
@@ -113,7 +143,9 @@ export class UDPRelayHandler extends EventEmitter {
    * NOTE: This only compares the addresses, not the allocated port.
    */
   hasRelay(relay: RelayEntry): boolean {
-    return this._relayTable.find((e) => e.equals(relay)) !== undefined;
+    return (
+      this._lookupAddr(relay.address.address, relay.address.port) !== undefined
+    );
   }
 
   /**
@@ -126,10 +158,13 @@ export class UDPRelayHandler extends EventEmitter {
       return false;
     }
 
+    const stored = this._relayTable[idx];
+
     this.emit("destroy", relay);
 
-    this.socketPool.returnPort(relay.port);
+    this.socketPool.returnPort(stored.port);
     this._relayTable = this.relayTable.filter((_, i) => i !== idx);
+    this._deindex(stored);
 
     activeRelayGauge.dec();
 
@@ -141,6 +176,8 @@ export class UDPRelayHandler extends EventEmitter {
    */
   clear() {
     this._relayTable.forEach((entry) => this.freeRelay(entry));
+    this._byAddress.clear();
+    this._byPort.clear();
 
     activeRelayGauge.reset();
   }
@@ -153,17 +190,40 @@ export class UDPRelayHandler extends EventEmitter {
    */
   // TODO: Why was the return type documented as Promise<boolean>?
   relay(msg: Buffer, sender: NetAddress, target: number): boolean {
+    return this.relayRaw(msg, sender.address, sender.port, target);
+  }
+
+  /**
+   * Relay a message, addressing the sender by its raw address + port.
+   *
+   * This is the allocation-free hot path: it avoids constructing a NetAddress
+   * per packet. A NetAddress is only built on the (cold) drop path, to preserve
+   * the `drop` event contract.
+   *
+   * @fires UDPRelayHandler#transmit
+   * @fires UDPRelayHandler#drop
+   */
+  relayRaw(
+    msg: Buffer,
+    senderAddress: string,
+    senderPort: number,
+    target: number,
+  ): boolean {
     const measure = relayDurationHistogram.startTimer();
 
-    const senderRelay = this._relayTable.find(
-      (r) =>
-        r.address.port === sender.port && r.address.address === sender.address,
-    );
-    const targetRelay = this._relayTable.find((r) => r.port === target);
+    const senderRelay = this._lookupAddr(senderAddress, senderPort);
+    const targetRelay = this._byPort.get(target);
 
     if (!senderRelay || !targetRelay) {
       // We don't have a relay for the sender, target, or both
-      this.emit("drop", senderRelay, targetRelay, sender, target, msg);
+      this.emit(
+        "drop",
+        senderRelay,
+        targetRelay,
+        new NetAddress({ address: senderAddress, port: senderPort }),
+        target,
+        msg,
+      );
 
       relayDropCounter.inc();
       measure();
