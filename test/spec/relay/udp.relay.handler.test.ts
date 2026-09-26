@@ -242,6 +242,19 @@ describe("UDPRelayHandler", () => {
       assert(socketPool.getSocket.notCalled, "Socket queried!");
       assert(socket.send.notCalled, "Message sent?");
       assert(dropHandler.calledOnce, "Drop event not emitted!");
+
+      // The drop event carries a NetAddress reconstructed from the raw sender
+      // address/port. It need not be the caller's instance, but must be
+      // value-equal — dynamic relaying keys off this address by value.
+      const droppedSender = dropHandler.firstCall.args[2];
+      assert(
+        droppedSender instanceof NetAddress,
+        "Drop sender is not a NetAddress!",
+      );
+      assert(
+        droppedSender.equals(new NetAddress({ address: "88.59.62.107", port: 65227 })),
+        "Drop sender address does not match the packet's origin!",
+      );
     });
     it("should ignore on missing socket", async () => {
       // Given
@@ -293,6 +306,143 @@ describe("UDPRelayHandler", () => {
       assert(!success, "Relay succeeded?");
       assert(socketPool.getSocket.called, "Socket not queried!");
       assert(socket.send.notCalled, "Message sent?");
+    });
+  });
+  describe("relayRaw", () => {
+    it("should relay through the raw hot path", async () => {
+      // Given
+      const message = Buffer.from("Hello!", "utf-8");
+      const socket = sinon.createStubInstance(dgram.Socket);
+      const socketPool = sinon.createStubInstance(UDPSocketPool);
+      socketPool.getPort.onFirstCall().returns(10001);
+      socketPool.getPort.onSecondCall().returns(10002);
+      socketPool.getSocket.returns(socket);
+      socket.removeAllListeners.returnsThis();
+      const handler = sinon.stub();
+
+      const relayHandler = new UDPRelayHandler({ socketPool });
+      relayHandler.on("transmit", handler);
+
+      // Sender, allocated local port 10001
+      relayHandler.createRelay(
+        new RelayEntry({
+          port: 57789,
+          address: new NetAddress({ address: "10.0.0.1", port: 1111 }),
+        }),
+      );
+      // Target, allocated local port 10002
+      relayHandler.createRelay(
+        new RelayEntry({
+          port: 57789,
+          address: new NetAddress({ address: "10.0.0.2", port: 2222 }),
+        }),
+      );
+      socketPool.getSocket.resetHistory();
+
+      // When — call the shipped hot path directly, no NetAddress allocation
+      const success = relayHandler.relayRaw(message, "10.0.0.1", 1111, 10002);
+
+      // Then
+      assert(success, "Relay failed!");
+      assert(
+        socketPool.getSocket.calledOnceWith(10001),
+        "Sender socket not queried!",
+      );
+      assert(
+        socket.send.calledWith(message, 2222, "10.0.0.2"),
+        "Message not sent to target address!",
+      );
+      assert(handler.calledOnce, "Transmit event not emitted!");
+    });
+
+    it("should drop after the target is freed (deindexed from _byPort)", async () => {
+      // Given
+      const message = Buffer.from("Hello!", "utf-8");
+      const socket = sinon.createStubInstance(dgram.Socket);
+      const socketPool = sinon.createStubInstance(UDPSocketPool);
+      socketPool.getPort.onFirstCall().returns(10001);
+      socketPool.getPort.onSecondCall().returns(10002);
+      socketPool.getSocket.returns(socket);
+      socket.removeAllListeners.returnsThis();
+      const dropHandler = sinon.spy();
+
+      const relayHandler = new UDPRelayHandler({ socketPool });
+
+      relayHandler.createRelay(
+        new RelayEntry({
+          port: 57789,
+          address: new NetAddress({ address: "10.0.0.1", port: 1111 }),
+        }),
+      );
+      const target = new RelayEntry({
+        port: 57789,
+        address: new NetAddress({ address: "10.0.0.2", port: 2222 }),
+      });
+      relayHandler.createRelay(target);
+
+      // Sanity: routing to the target works while it exists
+      assert(
+        relayHandler.relayRaw(message, "10.0.0.1", 1111, 10002),
+        "Precondition failed: target not routable",
+      );
+
+      relayHandler.freeRelay(target);
+      relayHandler.on("drop", dropHandler);
+      socketPool.getSocket.resetHistory();
+      socket.send.resetHistory();
+
+      // When — the target port is now gone from the index
+      const success = relayHandler.relayRaw(message, "10.0.0.1", 1111, 10002);
+
+      // Then
+      assert(!success, "Relay succeeded after target freed?");
+      assert(socket.send.notCalled, "Message sent to freed target?");
+      assert(dropHandler.calledOnce, "Drop event not emitted!");
+    });
+
+    it("should keep a shared address routable after freeing one of its ports", async () => {
+      // Given — two relays on the SAME address, different source ports
+      const socket = sinon.createStubInstance(dgram.Socket);
+      const socketPool = sinon.createStubInstance(UDPSocketPool);
+      socketPool.getPort.onFirstCall().returns(10001);
+      socketPool.getPort.onSecondCall().returns(10002);
+      socketPool.getSocket.returns(socket);
+      socket.removeAllListeners.returnsThis();
+
+      const relayHandler = new UDPRelayHandler({ socketPool });
+
+      const relayA = new RelayEntry({
+        port: 57789,
+        address: new NetAddress({ address: "10.0.0.1", port: 1111 }),
+      });
+      const relayB = new RelayEntry({
+        port: 57789,
+        address: new NetAddress({ address: "10.0.0.1", port: 2222 }),
+      });
+      relayHandler.createRelay(relayA);
+      relayHandler.createRelay(relayB);
+
+      // When — free only one of the two entries on this address
+      relayHandler.freeRelay(relayA);
+
+      // Then — the sibling on the same address is still indexed...
+      assert(!relayHandler.hasRelay(relayA), "Freed entry still present!");
+      assert(relayHandler.hasRelay(relayB), "Sibling entry was dropped!");
+      // ...and the address bucket is retained while any port remains
+      assert(
+        (relayHandler as any)._byAddress.has("10.0.0.1"),
+        "Address bucket removed while a port still exists!",
+      );
+
+      // When — free the last entry on the address
+      relayHandler.freeRelay(relayB);
+
+      // Then — the now-empty address bucket is cleaned up
+      assert(!relayHandler.hasRelay(relayB), "Freed entry still present!");
+      assert(
+        !(relayHandler as any)._byAddress.has("10.0.0.1"),
+        "Empty address bucket not cleaned up!",
+      );
     });
   });
   describe("hasRelay", () => {
