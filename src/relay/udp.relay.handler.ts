@@ -155,11 +155,15 @@ export class UDPRelayHandler extends EventEmitter {
   relay(msg: Buffer, sender: NetAddress, target: number): boolean {
     const measure = relayDurationHistogram.startTimer();
 
-    const senderRelay = this._relayTable.find(
+    let senderRelay = this._relayTable.find(
       (r) =>
         r.address.port === sender.port && r.address.address === sender.address,
     );
     const targetRelay = this._relayTable.find((r) => r.port === target);
+
+    if (!senderRelay && targetRelay) {
+      senderRelay = this.rehomeSender(sender, targetRelay);
+    }
 
     if (!senderRelay || !targetRelay) {
       // We don't have a relay for the sender, target, or both
@@ -189,6 +193,35 @@ export class UDPRelayHandler extends EventEmitter {
     measure();
 
     return true;
+  }
+
+  /**
+   * Behind a NAT that assigns a different public port per destination, the
+   * address a player registered with differs from the one its relay traffic
+   * arrives from. Match the unknown sender to the single other relay entry
+   * with the same public IP, and point that entry at the observed address.
+   */
+  private rehomeSender(
+    sender: NetAddress,
+    targetRelay: RelayEntry,
+  ): RelayEntry | undefined {
+    const candidates = this._relayTable.filter(
+      (r) => r !== targetRelay && r.address.address === sender.address,
+    );
+    if (candidates.length !== 1) {
+      return undefined;
+    }
+
+    const entry = candidates[0];
+    log.info(
+      { from: entry.address, to: sender },
+      "Re-homing relay to observed address",
+    );
+    entry.address = new NetAddress({
+      address: sender.address,
+      port: sender.port,
+    });
+    return entry;
   }
 }
 
